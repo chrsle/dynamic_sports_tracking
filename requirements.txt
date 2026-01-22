@@ -38,3 +38,16 @@ tqdm>=4.60.0
 # Jupyter notebooks
 jupyter>=1.0.0
 ipykernel>=6.0.0
+
+# Web dashboard
+fastapi>=0.100.0
+uvicorn>=0.23.0
+websockets>=11.0
+python-multipart>=0.0.6
+aiofiles>=23.0.0
+
+# HuggingFace Hub (for model downloads)
+huggingface_hub>=0.19.0
+
+# SciPy for analytics
+scipy>=1.10.0
