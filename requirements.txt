@@ -16,6 +16,7 @@ tensorflow>=2.4.1
 ultralytics>=8.0.0  # YOLO models
 supervision>=0.18.0  # Roboflow supervision library
 inference>=0.9.0  # Roboflow inference SDK
+rf-detr>=0.1.0  # RF-DETR: Meta DINOv2 backbone detector (state-of-the-art)
 
 # Vision-Language Models for jersey OCR
 transformers>=4.35.0  # SigLIP, SmolVLM2
