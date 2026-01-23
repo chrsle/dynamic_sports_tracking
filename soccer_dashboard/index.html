@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soccer Analytics Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">⚽ Soccer Analytics</h1>
+                <span class="match-time" id="matchTime">00:00</span>
+            </div>
+            <div class="header-center">
+                <div class="scoreboard">
+                    <div class="team home">
+                        <span class="team-name" id="homeTeamName">Home</span>
+                        <span class="score" id="homeScore">0</span>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="team away">
+                        <span class="score" id="awayScore">0</span>
+                        <span class="team-name" id="awayTeamName">Away</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="man-advantage" id="manAdvantage" style="display: none;">
+                    <span class="advantage-badge">11v10</span>
+                </div>
+                <div class="connection-status" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span>Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Video Playback Controls -->
+        <section class="video-controls">
+            <div class="controls-container">
+                <div class="playback-buttons">
+                    <button class="control-btn" id="prevFrameBtn" title="Previous Frame (←)">
+                        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </button>
+                    <button class="control-btn" id="skipBackBtn" title="Skip Back 10s">-10s</button>
+                    <button class="control-btn play-btn" id="playPauseBtn" title="Play/Pause (Space)">
+                        <svg viewBox="0 0 24 24" width="24" height="24" id="playIcon"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+                        <svg viewBox="0 0 24 24" width="24" height="24" id="pauseIcon" style="display:none;"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    <button class="control-btn" id="skipForwardBtn" title="Skip Forward 10s">+10s</button>
+                    <button class="control-btn" id="nextFrameBtn" title="Next Frame (→)">
+                        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </button>
+                </div>
+
+                <div class="timeline-container">
+                    <input type="range" id="frameSlider" class="frame-slider" min="0" max="100" value="0">
+                    <div class="shot-markers" id="shotMarkers"></div>
+                </div>
+
+                <div class="speed-controls">
+                    <label>Speed:</label>
+                    <select id="speedSelect">
+                        <option value="0.25">0.25x</option>
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                        <option value="4">4x</option>
+                    </select>
+                    <span class="frame-counter" id="frameCounter">Frame: 0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <main class="main-grid">
+            <!-- Left Column: Pitch Visualization -->
+            <section class="pitch-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Pitch View</h2>
+                        <div class="view-toggles">
+                            <button class="view-btn active" data-view="positions">Positions</button>
+                            <button class="view-btn" data-view="heatmap">Heatmap</button>
+                            <button class="view-btn" data-view="shotmap">Shot Map</button>
+                            <button class="view-btn" data-view="pressure">Pressure</button>
+                        </div>
+                    </div>
+                    <div class="pitch-container">
+                        <canvas id="pitchCanvas" width="700" height="455"></canvas>
+                    </div>
+                    <div class="pitch-legend" id="pitchLegend">
+                        <div class="legend-item"><span class="legend-dot home"></span>Home</div>
+                        <div class="legend-item"><span class="legend-dot away"></span>Away</div>
+                        <div class="legend-item"><span class="legend-dot ball"></span>Ball</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center Column: xG and Charts -->
+            <section class="charts-section">
+                <!-- xG Comparison -->
+                <div class="card xg-card">
+                    <div class="card-header">
+                        <h2>Expected Goals (xG)</h2>
+                    </div>
+                    <div class="xg-comparison">
+                        <div class="xg-team home">
+                            <span class="xg-value" id="homeXg">0.00</span>
+                            <span class="xg-label">Home xG</span>
+                        </div>
+                        <div class="xg-chart-container">
+                            <div id="xgChart"></div>
+                        </div>
+                        <div class="xg-team away">
+                            <span class="xg-value" id="awayXg">0.00</span>
+                            <span class="xg-label">Away xG</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- xG Timeline -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>xG Timeline</h2>
+                    </div>
+                    <div id="xgTimeline"></div>
+                </div>
+
+                <!-- Possession & Momentum -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Match Flow</h2>
+                    </div>
+                    <div class="match-flow">
+                        <div class="possession-bar">
+                            <span class="poss-label home"><span id="homePoss">50</span>%</span>
+                            <div class="poss-track">
+                                <div class="poss-fill home" id="homePossFill" style="width: 50%"></div>
+                            </div>
+                            <span class="poss-label away"><span id="awayPoss">50</span>%</span>
+                        </div>
+                        <div class="momentum-slider">
+                            <span class="momentum-label">Momentum</span>
+                            <div class="momentum-track">
+                                <div class="momentum-marker" id="momentumMarker" style="left: 50%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Player & Goalie Analytics -->
+            <section class="analytics-section">
+                <!-- Player Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Player Analytics</h2>
+                        <select id="playerSelect" class="player-select">
+                            <option value="">Select Player</option>
+                        </select>
+                    </div>
+                    <div class="player-stats" id="playerStats">
+                        <div class="stat-row">
+                            <span class="stat-label">Distance</span>
+                            <span class="stat-value" id="playerDistance">0 m</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Sprints</span>
+                            <span class="stat-value" id="playerSprints">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Velocity</span>
+                            <span class="stat-value" id="playerVelocity">0 m/s</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Fatigue</span>
+                            <div class="fatigue-bar">
+                                <div class="fatigue-fill" id="playerFatigue" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goalie Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Goalkeeper Analysis</h2>
+                        <select id="goalieTeamSelect" class="goalie-select">
+                            <option value="home">Home GK</option>
+                            <option value="away">Away GK</option>
+                        </select>
+                    </div>
+                    <div class="goalie-stats" id="goalieStats">
+                        <div class="goalie-viz">
+                            <canvas id="goalieCanvas" width="200" height="100"></canvas>
+                        </div>
+                        <div class="goalie-metrics">
+                            <div class="stat-row">
+                                <span class="stat-label">Coverage</span>
+                                <span class="stat-value" id="goalieCoverage">60%</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Positioning</span>
+                                <div class="quality-bar">
+                                    <div class="quality-fill" id="goaliePositioning" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Saves</span>
+                                <span class="stat-value" id="goalieSaves">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Distance from Line</span>
+                                <span class="stat-value" id="goalieDistance">0 m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shot List -->
+                <div class="card shots-card">
+                    <div class="card-header">
+                        <h2>Recent Shots</h2>
+                        <span class="shot-count" id="shotCount">0</span>
+                    </div>
+                    <div class="shots-list" id="shotsList">
+                        <!-- Shots will be populated here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Section: Advanced Analytics -->
+        <section class="advanced-analytics">
+            <div class="analytics-grid">
+                <!-- Pressure Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Pressure Analytics</h2>
+                    </div>
+                    <div class="pressure-stats">
+                        <div class="pressure-team home">
+                            <h4>Home</h4>
+                            <div class="stat-row">
+                                <span class="stat-label">PPDA</span>
+                                <span class="stat-value" id="homePPDA">10.0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Press Success</span>
+                                <span class="stat-value" id="homePressSuccess">35%</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Counter-Press</span>
+                                <div class="intensity-bar">
+                                    <div class="intensity-fill" id="homeCounterPress" style="width: 70%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pressure-team away">
+                            <h4>Away</h4>
+                            <div class="stat-row">
+                                <span class="stat-label">PPDA</span>
+                                <span class="stat-value" id="awayPPDA">10.0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Press Success</span>
+                                <span class="stat-value" id="awayPressSuccess">35%</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Counter-Press</span>
+                                <div class="intensity-bar">
+                                    <div class="intensity-fill" id="awayCounterPress" style="width: 70%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Play Patterns</h2>
+                    </div>
+                    <div class="pattern-stats">
+                        <div class="pattern-team home">
+                            <h4>Home</h4>
+                            <div class="stat-row">
+                                <span class="stat-label">Build-up</span>
+                                <span class="stat-value badge" id="homeBuildUp">Medium</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Attack Width</span>
+                                <span class="stat-value" id="homeWidth">45m</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Key Passes</span>
+                                <span class="stat-value" id="homeKeyPasses">0</span>
+                            </div>
+                        </div>
+                        <div class="pattern-team away">
+                            <h4>Away</h4>
+                            <div class="stat-row">
+                                <span class="stat-label">Build-up</span>
+                                <span class="stat-value badge" id="awayBuildUp">Medium</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Attack Width</span>
+                                <span class="stat-value" id="awayWidth">45m</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Key Passes</span>
+                                <span class="stat-value" id="awayKeyPasses">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fatigue Monitor -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Fatigue Monitor</h2>
+                    </div>
+                    <div class="fatigue-grid" id="fatigueGrid">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Insights Feed -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Live Insights</h2>
+                    </div>
+                    <div class="insights-feed" id="insightsFeed">
+                        <div class="insight">
+                            <span class="insight-time">00:00</span>
+                            <span class="insight-text">Match started</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Query Interface Modal -->
+        <div class="modal" id="queryModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Query Interface</h2>
+                    <button class="modal-close" id="closeModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="query-form">
+                        <div class="query-group">
+                            <label>Query Type</label>
+                            <select id="queryType">
+                                <option value="shots">Shots</option>
+                                <option value="xg_moments">High xG Moments</option>
+                                <option value="player">Player Events</option>
+                            </select>
+                        </div>
+                        <div class="query-group" id="teamFilter">
+                            <label>Team</label>
+                            <select id="queryTeam">
+                                <option value="">All</option>
+                                <option value="home">Home</option>
+                                <option value="away">Away</option>
+                            </select>
+                        </div>
+                        <div class="query-group" id="xgFilter">
+                            <label>Minimum xG</label>
+                            <input type="number" id="queryMinXg" min="0" max="1" step="0.05" value="0">
+                        </div>
+                        <button class="query-btn" id="runQuery">Run Query</button>
+                    </div>
+                    <div class="query-results" id="queryResults">
+                        <!-- Results will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Query Button -->
+        <button class="floating-btn" id="queryBtn" title="Open Query Interface">
+            🔍
+        </button>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
