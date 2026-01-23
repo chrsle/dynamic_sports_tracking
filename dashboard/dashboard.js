@@ -12,6 +12,22 @@ class HockeyDashboard {
         this.playerPositions = { home: [], away: [] };
         this.puckPosition = null;
 
+        // New tracking data
+        this.shots = [];
+        this.goaliePositions = {
+            home: { x: -85, y: 0, depth: 5, angle: 28, quality: 'optimal' },
+            away: { x: 85, y: 0, depth: 5, angle: 28, quality: 'optimal' }
+        };
+        this.powerPlay = {
+            is_power_play: false,
+            team_with_advantage: null,
+            home_players: 5,
+            away_players: 5,
+            time_remaining: 0,
+            type: 'even'
+        };
+        this.xgTimeline = [];
+
         this.init();
     }
 
@@ -60,6 +76,73 @@ class HockeyDashboard {
             tooltip: { enabled: false }
         });
         this.charts.xg.render();
+
+        // xG Timeline Chart
+        this.charts.xgTimeline = new ApexCharts(document.getElementById('xg-timeline-chart'), {
+            chart: {
+                type: 'area',
+                height: 100,
+                sparkline: { enabled: false },
+                toolbar: { show: false },
+                animations: {
+                    enabled: true,
+                    dynamicAnimation: { speed: 300 }
+                },
+                zoom: { enabled: false }
+            },
+            series: [{
+                name: 'Home xG',
+                data: []
+            }, {
+                name: 'Away xG',
+                data: []
+            }],
+            stroke: {
+                curve: 'smooth',
+                width: 2
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.5,
+                    opacityTo: 0.1
+                }
+            },
+            colors: ['#1a73e8', '#ea4335'],
+            xaxis: {
+                type: 'numeric',
+                labels: {
+                    show: true,
+                    formatter: (val) => Math.floor(val / 60) + ':' + String(Math.floor(val % 60)).padStart(2, '0'),
+                    style: { fontSize: '10px', colors: '#9aa0a6' }
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: {
+                    show: true,
+                    formatter: (val) => val.toFixed(1),
+                    style: { fontSize: '10px', colors: '#9aa0a6' }
+                }
+            },
+            grid: {
+                show: true,
+                borderColor: '#e8eaed',
+                strokeDashArray: 3,
+                padding: { left: 10, right: 10 }
+            },
+            tooltip: {
+                enabled: true,
+                shared: true,
+                x: {
+                    formatter: (val) => Math.floor(val / 60) + ':' + String(Math.floor(val % 60)).padStart(2, '0')
+                }
+            },
+            legend: { show: false }
+        });
+        this.charts.xgTimeline.render();
 
         // Scoring Chances Chart
         this.charts.chances = new ApexCharts(document.getElementById('chances-chart'), {
@@ -269,6 +352,9 @@ class HockeyDashboard {
             ctx.fill();
         });
 
+        // Draw goalies (larger, distinctive markers)
+        this.drawGoalies(ctx, w, h);
+
         // Draw puck
         if (this.puckPosition) {
             ctx.fillStyle = '#1a1a2e';
@@ -278,6 +364,153 @@ class HockeyDashboard {
             ctx.arc(px, py, 5, 0, Math.PI * 2);
             ctx.fill();
         }
+    }
+
+    drawGoalies(ctx, w, h) {
+        // Draw home goalie
+        if (this.goaliePositions.home) {
+            const pos = this.goaliePositions.home;
+            const x = (pos.x / 200 + 0.5) * w;
+            const y = (pos.y / 85 + 0.5) * h;
+
+            // Goalie marker (star shape)
+            ctx.fillStyle = '#1a73e8';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            this.drawStar(ctx, x, y, 5, 12, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            // Quality indicator ring
+            ctx.strokeStyle = this.getQualityColor(pos.quality);
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // Draw away goalie
+        if (this.goaliePositions.away) {
+            const pos = this.goaliePositions.away;
+            const x = (pos.x / 200 + 0.5) * w;
+            const y = (pos.y / 85 + 0.5) * h;
+
+            ctx.fillStyle = '#ea4335';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            this.drawStar(ctx, x, y, 5, 12, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.strokeStyle = this.getQualityColor(pos.quality);
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
+
+    drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+        let rot = Math.PI / 2 * 3;
+        let x = cx;
+        let y = cy;
+        const step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        for (let i = 0; i < spikes; i++) {
+            x = cx + Math.cos(rot) * outerRadius;
+            y = cy + Math.sin(rot) * outerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+
+            x = cx + Math.cos(rot) * innerRadius;
+            y = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+        }
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+    }
+
+    getQualityColor(quality) {
+        switch (quality) {
+            case 'optimal': return '#34a853';
+            case 'good': return '#4285f4';
+            case 'vulnerable': return '#fbbc04';
+            case 'out_of_position': return '#ea4335';
+            default: return '#9aa0a6';
+        }
+    }
+
+    drawShotMap() {
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        // Draw base rink
+        this.drawRink();
+
+        // Draw each shot
+        this.shots.forEach(shot => {
+            const x = (shot.x / 200 + 0.5) * w;
+            const y = (shot.y / 85 + 0.5) * h;
+
+            // Size based on xG
+            const radius = 4 + shot.xg * 20;
+
+            // Color based on result
+            let fillColor, strokeColor;
+            switch (shot.result) {
+                case 'goal':
+                    fillColor = '#34a853';
+                    strokeColor = '#2d9248';
+                    break;
+                case 'save':
+                    fillColor = '#4285f4';
+                    strokeColor = '#3b78e7';
+                    break;
+                case 'miss':
+                    fillColor = 'rgba(154, 160, 166, 0.5)';
+                    strokeColor = '#9aa0a6';
+                    break;
+                case 'block':
+                    fillColor = '#fbbc04';
+                    strokeColor = '#e8ab00';
+                    break;
+                default:
+                    fillColor = '#9aa0a6';
+                    strokeColor = '#5f6368';
+            }
+
+            // Team indicator (border)
+            ctx.strokeStyle = shot.team === 'home' ? '#1a73e8' : '#ea4335';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Shot marker
+            ctx.fillStyle = fillColor;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Goal indicator (special)
+            if (shot.result === 'goal') {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px Inter';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('G', x, y);
+            }
+        });
+
+        // Draw goalies on shot map too
+        this.drawGoalies(ctx, w, h);
     }
 
     drawHotspots(hotspots) {
@@ -333,12 +566,27 @@ class HockeyDashboard {
     }
 
     updateRinkView() {
+        // Show/hide appropriate legends
+        const rinkLegend = document.getElementById('rink-legend');
+        const shotLegend = document.getElementById('shot-legend');
+
+        if (this.rinkView === 'shotmap') {
+            rinkLegend.style.display = 'none';
+            shotLegend.style.display = 'flex';
+        } else {
+            rinkLegend.style.display = 'flex';
+            shotLegend.style.display = 'none';
+        }
+
         switch (this.rinkView) {
             case 'heatmap':
                 this.drawHeatmap(this.heatmapData);
                 break;
             case 'positions':
                 this.drawPositions();
+                break;
+            case 'shotmap':
+                this.drawShotMap();
                 break;
             case 'hotspots':
                 this.drawHotspots(this.hotspots);
@@ -424,7 +672,119 @@ class HockeyDashboard {
             this.puckPosition = data.puckPosition;
         }
 
+        // New data handling
+        if (data.shots) {
+            this.shots = data.shots;
+            this.updateShotStats();
+        }
+
+        if (data.goaliePositions) {
+            this.goaliePositions = data.goaliePositions;
+            this.updateGoalieDisplay();
+        }
+
+        if (data.powerPlay) {
+            this.powerPlay = data.powerPlay;
+            this.updatePowerPlayDisplay();
+        }
+
+        if (data.xgTimeline) {
+            this.xgTimeline = data.xgTimeline;
+            this.updateXGTimeline();
+        }
+
         this.updateRinkView();
+    }
+
+    updateShotStats() {
+        const homeShots = this.shots.filter(s => s.team === 'home');
+        const awayShots = this.shots.filter(s => s.team === 'away');
+
+        const homeGoals = homeShots.filter(s => s.result === 'goal').length;
+        const awayGoals = awayShots.filter(s => s.result === 'goal').length;
+
+        const homeSaves = awayShots.filter(s => s.result === 'save').length;
+        const awaySaves = homeShots.filter(s => s.result === 'save').length;
+
+        const homeAvgXG = homeShots.length > 0
+            ? homeShots.reduce((sum, s) => sum + s.xg, 0) / homeShots.length
+            : 0;
+        const awayAvgXG = awayShots.length > 0
+            ? awayShots.reduce((sum, s) => sum + s.xg, 0) / awayShots.length
+            : 0;
+
+        document.getElementById('shots-home').textContent = homeShots.length;
+        document.getElementById('shots-away').textContent = awayShots.length;
+        document.getElementById('goals-home').textContent = homeGoals;
+        document.getElementById('goals-away').textContent = awayGoals;
+        document.getElementById('saves-home').textContent = homeSaves;
+        document.getElementById('saves-away').textContent = awaySaves;
+        document.getElementById('avg-xg-home').textContent = homeAvgXG.toFixed(2);
+        document.getElementById('avg-xg-away').textContent = awayAvgXG.toFixed(2);
+
+        // Update score display
+        document.getElementById('score').textContent = `${homeGoals} - ${awayGoals}`;
+    }
+
+    updateGoalieDisplay() {
+        // Home goalie
+        if (this.goaliePositions.home) {
+            const home = this.goaliePositions.home;
+            const qualityEl = document.getElementById('goalie-home-quality');
+            qualityEl.textContent = home.quality.charAt(0).toUpperCase() + home.quality.slice(1).replace('_', ' ');
+            qualityEl.className = 'goalie-quality ' + home.quality;
+
+            document.getElementById('goalie-home-depth').textContent = home.depth.toFixed(1);
+            document.getElementById('goalie-home-angle').textContent = Math.round(home.angle);
+            document.getElementById('goalie-home-position').textContent = `(${home.y.toFixed(0)}, ${(home.x + 100).toFixed(0)})`;
+        }
+
+        // Away goalie
+        if (this.goaliePositions.away) {
+            const away = this.goaliePositions.away;
+            const qualityEl = document.getElementById('goalie-away-quality');
+            qualityEl.textContent = away.quality.charAt(0).toUpperCase() + away.quality.slice(1).replace('_', ' ');
+            qualityEl.className = 'goalie-quality ' + away.quality;
+
+            document.getElementById('goalie-away-depth').textContent = away.depth.toFixed(1);
+            document.getElementById('goalie-away-angle').textContent = Math.round(away.angle);
+            document.getElementById('goalie-away-position').textContent = `(${away.y.toFixed(0)}, ${(100 - away.x).toFixed(0)})`;
+        }
+    }
+
+    updatePowerPlayDisplay() {
+        const ppIndicator = document.getElementById('power-play-indicator');
+        const ppBadge = document.getElementById('pp-badge');
+        const ppType = document.getElementById('pp-type');
+        const ppTime = document.getElementById('pp-time');
+
+        if (this.powerPlay.is_power_play) {
+            ppIndicator.style.display = 'flex';
+            ppIndicator.className = 'power-play-indicator ' +
+                (this.powerPlay.team_with_advantage === 'home' ? 'home-advantage' : 'away-advantage');
+
+            ppBadge.textContent = this.powerPlay.team_with_advantage === 'home' ? 'PP' : 'PK';
+            ppType.textContent = this.powerPlay.type;
+
+            const mins = Math.floor(this.powerPlay.time_remaining / 60);
+            const secs = Math.floor(this.powerPlay.time_remaining % 60);
+            ppTime.textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+        } else {
+            ppIndicator.style.display = 'none';
+        }
+    }
+
+    updateXGTimeline() {
+        if (this.xgTimeline.length === 0) return;
+
+        // Prepare data for chart
+        const homeData = this.xgTimeline.map(p => ({ x: p.time, y: p.home_xg }));
+        const awayData = this.xgTimeline.map(p => ({ x: p.time, y: p.away_xg }));
+
+        this.charts.xgTimeline.updateSeries([
+            { name: 'Home xG', data: homeData },
+            { name: 'Away xG', data: awayData }
+        ]);
     }
 
     updateSignal(signal) {
@@ -565,6 +925,11 @@ class HockeyDashboard {
     startDemoMode() {
         console.log('Starting demo mode');
 
+        // Initialize demo xG timeline
+        this._demoTime = 0;
+        this._demoXgHome = 0;
+        this._demoXgAway = 0;
+
         // Initial data
         this.updateDashboard({
             teams: { home: 'Penguins', away: 'Oilers' },
@@ -587,7 +952,21 @@ class HockeyDashboard {
                 good: 4,
                 suboptimal: 2,
                 critical: 1
-            }
+            },
+            shots: [],
+            goaliePositions: {
+                home: { x: -85, y: 0, depth: 5, angle: 28, quality: 'optimal' },
+                away: { x: 85, y: 0, depth: 5, angle: 28, quality: 'optimal' }
+            },
+            powerPlay: {
+                is_power_play: false,
+                team_with_advantage: null,
+                home_players: 5,
+                away_players: 5,
+                time_remaining: 0,
+                type: 'even'
+            },
+            xgTimeline: []
         });
 
         // Add some demo insights
@@ -599,8 +978,44 @@ class HockeyDashboard {
         // Generate demo player positions
         this.generateDemoPositions();
 
+        // Generate some initial shots
+        this.generateDemoShots(5);
+
         // Update periodically
         setInterval(() => this.updateDemoData(), 2000);
+    }
+
+    generateDemoShots(count) {
+        for (let i = 0; i < count; i++) {
+            const team = Math.random() > 0.45 ? 'home' : 'away';
+            let x, y;
+
+            if (team === 'home') {
+                x = 50 + Math.random() * 35;
+                y = (Math.random() - 0.5) * 50;
+            } else {
+                x = -50 - Math.random() * 35;
+                y = (Math.random() - 0.5) * 50;
+            }
+
+            const goalX = team === 'home' ? 89 : -89;
+            const dist = Math.sqrt((x - goalX) ** 2 + y ** 2);
+            const xg = Math.max(0.02, Math.min(0.5, 0.4 - dist * 0.008));
+
+            const rand = Math.random();
+            let result;
+            if (rand < xg) result = 'goal';
+            else if (rand < xg + 0.6) result = 'save';
+            else if (rand < xg + 0.75) result = 'miss';
+            else result = 'block';
+
+            this.shots.push({
+                x, y, team, xg, result,
+                time: this._demoTime || 0,
+                period: 1
+            });
+        }
+        this.updateShotStats();
     }
 
     generateDemoPositions() {
@@ -627,6 +1042,9 @@ class HockeyDashboard {
     }
 
     updateDemoData() {
+        // Increment demo time
+        this._demoTime = (this._demoTime || 0) + 2;
+
         // Random momentum shift
         const momentumShift = (Math.random() - 0.5) * 0.1;
         const newMomentum = Math.max(-1, Math.min(1, this._lastMomentum + momentumShift || 0.2));
@@ -640,10 +1058,19 @@ class HockeyDashboard {
         else if (newMomentum < -0.2) signalText = 'LEAN_AWAY';
 
         // Update xG
-        const xgHome = (this._xgHome || 1.23) + (newMomentum > 0 ? Math.random() * 0.05 : 0);
-        const xgAway = (this._xgAway || 0.87) + (newMomentum < 0 ? Math.random() * 0.05 : 0);
-        this._xgHome = xgHome;
-        this._xgAway = xgAway;
+        this._demoXgHome = (this._demoXgHome || 1.23) + (newMomentum > 0 ? Math.random() * 0.03 : Math.random() * 0.01);
+        this._demoXgAway = (this._demoXgAway || 0.87) + (newMomentum < 0 ? Math.random() * 0.03 : Math.random() * 0.01);
+
+        // Add to xG timeline
+        this.xgTimeline.push({
+            time: this._demoTime,
+            home_xg: this._demoXgHome,
+            away_xg: this._demoXgAway
+        });
+        // Keep last 100 points
+        if (this.xgTimeline.length > 100) {
+            this.xgTimeline = this.xgTimeline.slice(-100);
+        }
 
         // Move players slightly
         this.playerPositions.home.forEach(p => {
@@ -660,6 +1087,54 @@ class HockeyDashboard {
         this.puckPosition.x += (Math.random() - 0.4) * 10;
         this.puckPosition.y += (Math.random() - 0.5) * 5;
 
+        // Update goalie positions (subtle movements)
+        this.goaliePositions.home = {
+            x: -85 + (Math.random() - 0.5) * 6,
+            y: (Math.random() - 0.5) * 16,
+            depth: 5 + (Math.random() - 0.5) * 6,
+            angle: 28 + (Math.random() - 0.5) * 10,
+            quality: Math.random() > 0.85 ? 'vulnerable' : Math.random() > 0.7 ? 'good' : 'optimal'
+        };
+        this.goaliePositions.away = {
+            x: 85 + (Math.random() - 0.5) * 6,
+            y: (Math.random() - 0.5) * 16,
+            depth: 5 + (Math.random() - 0.5) * 6,
+            angle: 28 + (Math.random() - 0.5) * 10,
+            quality: Math.random() > 0.85 ? 'vulnerable' : Math.random() > 0.7 ? 'good' : 'optimal'
+        };
+
+        // Occasionally generate a shot
+        if (Math.random() > 0.85) {
+            this.generateDemoShots(1);
+        }
+
+        // Power play simulation (occasional)
+        if (Math.random() > 0.97) {
+            // Start power play
+            const ppTeam = Math.random() > 0.5 ? 'home' : 'away';
+            this.powerPlay = {
+                is_power_play: true,
+                team_with_advantage: ppTeam,
+                home_players: ppTeam === 'home' ? 5 : 4,
+                away_players: ppTeam === 'away' ? 5 : 4,
+                time_remaining: 120,
+                type: '5v4'
+            };
+        } else if (this.powerPlay.is_power_play) {
+            // Decrement power play time
+            this.powerPlay.time_remaining -= 2;
+            if (this.powerPlay.time_remaining <= 0) {
+                this.powerPlay = {
+                    is_power_play: false,
+                    team_with_advantage: null,
+                    home_players: 5,
+                    away_players: 5,
+                    time_remaining: 0,
+                    type: 'even'
+                };
+            }
+        }
+
         this.updateDashboard({
             signal: {
                 text: signalText,
@@ -675,13 +1150,17 @@ class HockeyDashboard {
                 trend: momentumShift > 0.03 ? 'increasing_home' :
                     momentumShift < -0.03 ? 'increasing_away' : 'stable'
             },
-            xg: { home: xgHome, away: xgAway },
+            xg: { home: this._demoXgHome, away: this._demoXgAway },
             positions: {
                 optimal: Math.floor(Math.random() * 3) + 2,
                 good: Math.floor(Math.random() * 4) + 3,
                 suboptimal: Math.floor(Math.random() * 3) + 1,
                 critical: Math.floor(Math.random() * 2)
-            }
+            },
+            shots: this.shots,
+            goaliePositions: this.goaliePositions,
+            powerPlay: this.powerPlay,
+            xgTimeline: this.xgTimeline
         });
 
         // Occasional insight
@@ -691,7 +1170,9 @@ class HockeyDashboard {
                 { icon: '🎯', text: 'High-danger chance created' },
                 { icon: '📈', text: 'Momentum shifting' },
                 { icon: '🔄', text: 'Line change detected' },
-                { icon: '🥅', text: 'Shot on goal' }
+                { icon: '🥅', text: 'Shot on goal' },
+                { icon: '🧤', text: 'Goalie tracking puck' },
+                { icon: '🏒', text: 'Zone entry attempt' }
             ];
             this.updateInsights([insights[Math.floor(Math.random() * insights.length)]]);
         }

@@ -698,3 +698,264 @@ body {
         gap: var(--spacing-md);
     }
 }
+
+/* ==================== Power Play Indicator ==================== */
+.score-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.power-play-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--warning);
+    border-radius: var(--radius-sm);
+    animation: ppPulse 1.5s ease-in-out infinite;
+}
+
+.power-play-indicator.home-advantage {
+    background: var(--home-light);
+    border: 1px solid var(--home-color);
+}
+
+.power-play-indicator.away-advantage {
+    background: var(--away-light);
+    border: 1px solid var(--away-color);
+}
+
+@keyframes ppPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.pp-badge {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+}
+
+.pp-type {
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+.pp-time {
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+}
+
+/* ==================== Shot Map Legend ==================== */
+.shot-legend {
+    display: flex;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+}
+
+.shot-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.shot-marker.goal {
+    background: var(--success);
+    box-shadow: 0 0 4px var(--success);
+}
+
+.shot-marker.save {
+    background: var(--info);
+}
+
+.shot-marker.miss {
+    background: var(--text-tertiary);
+    border: 1px dashed var(--text-secondary);
+}
+
+.shot-marker.block {
+    background: var(--warning);
+}
+
+.legend-color.goalie {
+    background: linear-gradient(135deg, var(--home-color) 50%, var(--away-color) 50%);
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px var(--text-primary);
+}
+
+/* ==================== xG Timeline Section ==================== */
+.xg-timeline-section {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--border-light);
+}
+
+.xg-timeline-section h3 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-sm);
+}
+
+#xg-timeline-chart {
+    height: 100px;
+}
+
+/* ==================== Goalie Section ==================== */
+.goalie-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    padding: 0 var(--spacing-xl) var(--spacing-lg);
+}
+
+.goalie-panel {
+    grid-column: span 1;
+}
+
+.goalie-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.goalie-card {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+}
+
+.goalie-card.home {
+    border-left: 3px solid var(--home-color);
+}
+
+.goalie-card.away {
+    border-left: 3px solid var(--away-color);
+}
+
+.goalie-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.goalie-team {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.goalie-quality {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    background: var(--success);
+    color: white;
+}
+
+.goalie-quality.optimal { background: var(--success); }
+.goalie-quality.good { background: var(--info); }
+.goalie-quality.vulnerable { background: var(--warning); color: var(--text-primary); }
+.goalie-quality.out_of_position { background: var(--danger); }
+
+.goalie-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+}
+
+.goalie-stat {
+    text-align: center;
+}
+
+.goalie-stat .stat-value {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+.goalie-stat .stat-label {
+    font-size: 0.625rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+}
+
+/* ==================== Shot Stats Panel ==================== */
+.shot-stats-panel {
+    grid-column: span 1;
+}
+
+.shot-stats-grid {
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.shot-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.shot-stat-row:last-child {
+    border-bottom: none;
+}
+
+.shot-stat-label {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.shot-stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    width: 50px;
+    text-align: center;
+}
+
+.shot-stat-value.home {
+    color: var(--home-color);
+}
+
+.shot-stat-value.away {
+    color: var(--away-color);
+}
+
+.shot-stat-divider {
+    color: var(--text-tertiary);
+    margin: 0 var(--spacing-sm);
+}
+
+/* ==================== Responsive - Goalie Section ==================== */
+@media (max-width: 1200px) {
+    .goalie-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .goalie-grid {
+        grid-template-columns: 1fr;
+    }
+}
