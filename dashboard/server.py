@@ -13,6 +13,8 @@ Security Features:
 - Rate limiting
 - Secure file uploads
 - Structured logging
+- Request correlation IDs
+- Sentry error monitoring (optional)
 """
 
 import asyncio
@@ -25,6 +27,7 @@ import sys
 import time
 import uuid
 from contextlib import asynccontextmanager
+from contextvars import ContextVar
 from datetime import datetime
 from functools import wraps
 from typing import Annotated, Dict, List, Optional
@@ -34,22 +37,60 @@ from pathlib import Path
 
 from fastapi import (
     FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File,
-    HTTPException, Depends, Security, Request, status
+    HTTPException, Depends, Security, Request, Response, status
 )
 from fastapi.security import APIKeyHeader
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel, Field, field_validator
 import uvicorn
 
-# Configure structured logging
+# Request correlation ID context variable
+correlation_id_ctx: ContextVar[str] = ContextVar('correlation_id', default='')
+
+
+class CorrelationIdFilter(logging.Filter):
+    """Add correlation ID to log records."""
+
+    def filter(self, record):
+        record.correlation_id = correlation_id_ctx.get('')
+        return True
+
+
+# Configure structured logging with correlation ID
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
-    format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s", "module": "%(module)s"}',
+    format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "correlation_id": "%(correlation_id)s", "message": "%(message)s", "module": "%(module)s"}',
     datefmt='%Y-%m-%dT%H:%M:%S'
 )
 logger = logging.getLogger(__name__)
+logger.addFilter(CorrelationIdFilter())
+
+# Initialize Sentry for error monitoring (optional)
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.fastapi import FastApiIntegration
+        from sentry_sdk.integrations.starlette import StarletteIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[
+                StarletteIntegration(transaction_style="endpoint"),
+                FastApiIntegration(transaction_style="endpoint"),
+            ],
+            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+            environment=os.getenv("ENVIRONMENT", "production"),
+            release=os.getenv("APP_VERSION", "2.0.0"),
+        )
+        logger.info("Sentry error monitoring initialized")
+    except ImportError:
+        logger.warning("sentry-sdk not installed, error monitoring disabled")
+else:
+    logger.info("SENTRY_DSN not set, error monitoring disabled")
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -255,13 +296,48 @@ app = FastAPI(
     redoc_url="/redoc" if settings.debug_mode else None,
 )
 
+# ==================== Middleware ====================
+
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
+    """Add correlation ID to each request for tracing."""
+
+    async def dispatch(self, request: Request, call_next):
+        # Get correlation ID from header or generate new one
+        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        correlation_id_ctx.set(correlation_id)
+
+        # Log request
+        logger.info(f"Request started: {request.method} {request.url.path}")
+
+        start_time = time.time()
+
+        try:
+            response = await call_next(request)
+            process_time = time.time() - start_time
+
+            # Add correlation ID and timing to response headers
+            response.headers["X-Correlation-ID"] = correlation_id
+            response.headers["X-Process-Time"] = f"{process_time:.4f}"
+
+            logger.info(f"Request completed: {request.method} {request.url.path} - {response.status_code} ({process_time:.4f}s)")
+
+            return response
+        except Exception as e:
+            process_time = time.time() - start_time
+            logger.error(f"Request failed: {request.method} {request.url.path} - {str(e)} ({process_time:.4f}s)")
+            raise
+
+
+# Add correlation ID middleware first
+app.add_middleware(CorrelationIdMiddleware)
+
 # CORS middleware with restricted origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["X-API-Key", "Content-Type"],
+    allow_headers=["X-API-Key", "Content-Type", "X-Correlation-ID"],
 )
 
 # Serve static files (dashboard)
