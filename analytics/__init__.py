@@ -74,6 +74,24 @@ Modules:
     pass_model: Pass Probability Model - xPass framework
                for pass success prediction and playmaking
 
+    physics_voronoi: Physics-Driven Voronoi - Velocity and
+                    acceleration-weighted ice dominance
+
+    knn_ownership: KNN Ice Ownership - Neighbor-based approach
+                  to flexible ice control surfaces
+
+    defensive_spatial: Defensive Spatial Structure - Location-specific
+                      defensive skill evaluation
+
+    deep_tracking: Deep Tracking Features - Learned representations
+                  from raw tracking data
+
+    talent_prediction: Talent/Draft Prediction - Prospect evaluation
+                      and NHL success prediction
+
+    puck_trajectory: Puck Trajectory Analysis - Shot and pass
+                    trajectory prediction with physics
+
 Research Origins:
     - Soccer: xT (Karun Singh), EPV (Fernández & Bornn), Pitch Control,
               VAEP (Decroos), SoccerCPD (Kim), Football2Vec
@@ -336,6 +354,91 @@ from .pass_model import (
     PlayerPosition as PassPlayerPosition,
 )
 
+# Physics-Driven Voronoi
+from .physics_voronoi import (
+    PhysicsVoronoiModel,
+    GapAnalyzer,
+    MomentumTracker,
+    SkaterState,
+    DominanceCell,
+    DominanceMap,
+    InfluenceModel,
+)
+
+# KNN Ice Ownership
+from .knn_ownership import (
+    KNNOwnershipModel,
+    AdaptiveKNNOwnership,
+    OwnershipComparator,
+    CoverageAnalyzer,
+    PlayerState as KNNPlayerState,
+    OwnershipCell,
+    OwnershipGrid,
+    DistanceMetric,
+    WeightingScheme,
+)
+
+# Defensive Spatial Structure
+from .defensive_spatial import (
+    DefensiveSpatialModel,
+    DefensiveGravityModel,
+    ZoneBreakdownAnalyzer,
+    DefenderPosition,
+    AttackerPosition,
+    DefensiveImpact,
+    SpatialDefenseProfile,
+    DefensiveZone,
+    DefensiveAction,
+)
+
+# Deep Tracking Features
+from .deep_tracking import (
+    DeepTrackingEncoder,
+    TrackingPreprocessor,
+    FeatureExtractor,
+    PlayClassifier,
+    SimilaritySearch,
+    TransferLearner,
+    TrackingFrame as DeepTrackingFrame,
+    TrackingSequence,
+    LearnedFeatures,
+    ModelConfig,
+    EncoderType,
+    PoolingType,
+)
+
+# Talent/Draft Prediction
+from .talent_prediction import (
+    TalentPredictor,
+    TrackingSkillExtractor,
+    LeagueEquivalency,
+    ComparablesFinder,
+    DraftRankingModel,
+    ProspectProfile,
+    ProspectEvaluation,
+    TrackingMetrics,
+    HistoricalComparable,
+    ProspectLeague,
+    Position as TalentPosition,
+    SkillCategory,
+)
+
+# Puck Trajectory Analysis
+from .puck_trajectory import (
+    PuckPhysicsModel,
+    ShotSuccessPredictor,
+    PassCompletionPredictor,
+    DeflectionAnalyzer,
+    TrajectoryVisualizer,
+    PuckState,
+    ShotTrajectory,
+    PassTrajectory,
+    TrajectoryPrediction,
+    ShotType as TrajectoryShotType,
+    ShotOutcome,
+    PassType as TrajectoryPassType,
+)
+
 
 # Convenience functions
 def create_full_analytics_suite(
@@ -430,6 +533,37 @@ def create_full_analytics_suite(
         'defensive_pass': DefensivePassAnalyzer(),
         'playmaking': PlaymakingEvaluator(),
 
+        # Physics-Driven Voronoi
+        'physics_voronoi': PhysicsVoronoiModel(),
+        'gap_analyzer': GapAnalyzer(PhysicsVoronoiModel()),
+        'momentum_tracker': MomentumTracker(),
+
+        # KNN Ice Ownership
+        'knn_ownership': KNNOwnershipModel(),
+        'adaptive_ownership': AdaptiveKNNOwnership(),
+        'coverage_analyzer': CoverageAnalyzer(KNNOwnershipModel()),
+
+        # Defensive Spatial Structure
+        'defensive_spatial': DefensiveSpatialModel(),
+        'defensive_gravity': DefensiveGravityModel(DefensiveSpatialModel()),
+        'zone_breakdown': ZoneBreakdownAnalyzer(DefensiveSpatialModel()),
+
+        # Deep Tracking Features
+        'deep_encoder': DeepTrackingEncoder(ModelConfig()),
+        'tracking_preprocessor': TrackingPreprocessor(ModelConfig()),
+        'feature_extractor': FeatureExtractor(DeepTrackingEncoder(ModelConfig())),
+
+        # Talent Prediction
+        'talent_predictor': TalentPredictor(),
+        'skill_extractor': TrackingSkillExtractor(),
+        'draft_ranking': DraftRankingModel(TalentPredictor()),
+
+        # Puck Trajectory Analysis
+        'puck_physics': PuckPhysicsModel(),
+        'shot_predictor': ShotSuccessPredictor(PuckPhysicsModel()),
+        'pass_completion': PassCompletionPredictor(PuckPhysicsModel()),
+        'deflection_analyzer': DeflectionAnalyzer(PuckPhysicsModel()),
+
         # Data integration
         'nhl_client': NHLAPIClient(),
     }
@@ -460,6 +594,12 @@ MODULES = [
     "forechecking",
     "contract_value",
     "pass_model",
+    "physics_voronoi",
+    "knn_ownership",
+    "defensive_spatial",
+    "deep_tracking",
+    "talent_prediction",
+    "puck_trajectory",
 ]
 
 # Research gap mapping
@@ -573,5 +713,35 @@ RESEARCH_GAPS = {
         "source_sports": ["soccer"],
         "original_research": ["xPass", "GCN passing networks", "Pass success models"],
         "hockey_gap": "Pass completion probability with defensive credit",
+    },
+    "physics_voronoi": {
+        "source_sports": ["soccer"],
+        "original_research": ["Efthimiou Voronoi diagrams", "Physics-driven dominance space"],
+        "hockey_gap": "Velocity/acceleration-weighted ice dominance surfaces",
+    },
+    "knn_ownership": {
+        "source_sports": ["soccer"],
+        "original_research": ["Neighbor-based pitch ownership (2025)", "KNN spatial models"],
+        "hockey_gap": "Flexible probabilistic ice control with uncertainty",
+    },
+    "defensive_spatial": {
+        "source_sports": ["basketball"],
+        "original_research": ["Franks, Miller, Bornn, Goldsberry (2015)", "Spatial defensive skill"],
+        "hockey_gap": "Location-specific defensive skill evaluation",
+    },
+    "deep_tracking": {
+        "source_sports": ["football"],
+        "original_research": ["Horton (2020) MIT Sloan", "Feature learning from tracking"],
+        "hockey_gap": "Learned representations from NHL EDGE data",
+    },
+    "talent_prediction": {
+        "source_sports": ["basketball"],
+        "original_research": ["AutoStats", "Stats Perform talent prediction"],
+        "hockey_gap": "NHL success prediction from junior/college tracking",
+    },
+    "puck_trajectory": {
+        "source_sports": ["basketball"],
+        "original_research": ["Shah et al. trajectory prediction", "RNN shot success"],
+        "hockey_gap": "Shot/pass trajectory prediction with physics",
     },
 }
