@@ -92,6 +92,24 @@ Modules:
     puck_trajectory: Puck Trajectory Analysis - Shot and pass
                     trajectory prediction with physics
 
+    pressure_strategy: Pressure Strategy RL - Double-team and
+                      forecheck optimization with deep RL
+
+    multiplex_network: Complex Multiplex Passing Network - Multi-layer
+                      network analysis by pass type
+
+    phase_detection: CNN Phase Detection - Phase of play and
+                    formation classification
+
+    comprehensive_monitoring: Comprehensive Monitoring - Multi-source
+                             injury and illness prediction
+
+    play2vec: Play2Vec Embedding - Play similarity and
+             retrieval system
+
+    video_analysis: Video Action Spotting - SoccerNet-style
+                   video analysis and action detection
+
 Research Origins:
     - Soccer: xT (Karun Singh), EPV (Fernández & Bornn), Pitch Control,
               VAEP (Decroos), SoccerCPD (Kim), Football2Vec
@@ -439,6 +457,102 @@ from .puck_trajectory import (
     PassType as TrajectoryPassType,
 )
 
+# Pressure Strategy RL
+from .pressure_strategy import (
+    PressureStrategyRL,
+    PinchDecisionModel,
+    DoubleteamOptimizer,
+    PressureAnalytics,
+    NBNetEncoder,
+    PressureState,
+    PressureAction,
+    PressureOutcome,
+    PressurePolicy,
+    PressureType,
+    ZoneLocation,
+    GameSituation,
+)
+
+# Complex Multiplex Passing Network
+from .multiplex_network import (
+    MultiplexPassingNetwork,
+    PassingStyleClassifier,
+    PlayOutcomePredictor,
+    LineChemistryAnalyzer,
+    PassEdge,
+    NetworkNode,
+    LayerMetrics,
+    MultiplexMetrics,
+    PassLayer,
+    ZoneType as NetworkZoneType,
+)
+
+# CNN Phase Detection
+from .phase_detection import (
+    PhaseClassifierCNN,
+    PhaseSequenceAnalyzer,
+    PhaseBasedAnalytics,
+    TrackingSnapshot,
+    PhaseDetection,
+    PhaseSequence,
+    GamePhase,
+    OffensiveZonePhase,
+    DefensiveZonePhase,
+    NeutralZonePhase,
+    ForecheckSystem,
+)
+
+# Comprehensive Monitoring
+from .comprehensive_monitoring import (
+    ComprehensiveRiskModel,
+    ACWRCalculator,
+    SleepQualityAnalyzer,
+    WellnessScoreCalculator,
+    BloodMarkerAnalyzer,
+    MonitoringProfile,
+    RiskAssessment,
+    TrackingData as MonitoringTrackingData,
+    BiometricData,
+    SubjectiveData,
+    BloodMarkers,
+    PerformanceTest,
+    InjuryHistory,
+    InjuryRiskLevel,
+    IllnessRiskLevel,
+    DataSource,
+)
+
+# Play2Vec Embedding
+from .play2vec import (
+    Play2VecModel,
+    PlayRetriever,
+    GridEncoder,
+    SegmentVocabulary,
+    SkipGramEmbedder,
+    SequenceEncoder,
+    PlaySequence as Play2VecSequence,
+    PlayEmbedding,
+    SimilarPlay,
+    TrackingPoint,
+    PlayType as Play2VecPlayType,
+)
+
+# Video Analysis
+from .video_analysis import (
+    VideoAnalyzer,
+    FeatureExtractor as VideoFeatureExtractor,
+    ActionClassifier,
+    TemporalActionDetector,
+    CameraCalibration,
+    PlayerTracker,
+    VideoFrame,
+    ActionSpot,
+    GameSegment,
+    VideoAnalysisResult,
+    HockeyAction,
+    CameraView,
+)
+
 
 # Convenience functions
 def create_full_analytics_suite(
@@ -564,6 +678,30 @@ def create_full_analytics_suite(
         'pass_completion': PassCompletionPredictor(PuckPhysicsModel()),
         'deflection_analyzer': DeflectionAnalyzer(PuckPhysicsModel()),
 
+        # Pressure Strategy RL
+        'pressure_rl': PressureStrategyRL(),
+        'pinch_model': PinchDecisionModel(),
+        'doubleteam_optimizer': DoubleteamOptimizer(),
+
+        # Multiplex Passing Network
+        'multiplex_network': MultiplexPassingNetwork(),
+        'passing_style': PassingStyleClassifier(),
+
+        # Phase Detection
+        'phase_classifier': PhaseClassifierCNN(),
+        'phase_analyzer': PhaseSequenceAnalyzer(PhaseClassifierCNN()),
+
+        # Comprehensive Monitoring
+        'risk_model': ComprehensiveRiskModel(),
+        'acwr_calculator': ACWRCalculator(),
+        'wellness_calculator': WellnessScoreCalculator(),
+
+        # Play2Vec
+        'play2vec': Play2VecModel(),
+
+        # Video Analysis
+        'video_analyzer': VideoAnalyzer(),
+
         # Data integration
         'nhl_client': NHLAPIClient(),
     }
@@ -600,6 +738,12 @@ MODULES = [
     "deep_tracking",
     "talent_prediction",
     "puck_trajectory",
+    "pressure_strategy",
+    "multiplex_network",
+    "phase_detection",
+    "comprehensive_monitoring",
+    "play2vec",
+    "video_analysis",
 ]
 
 # Research gap mapping
@@ -743,5 +887,35 @@ RESEARCH_GAPS = {
         "source_sports": ["basketball"],
         "original_research": ["Shah et al. trajectory prediction", "RNN shot success"],
         "hockey_gap": "Shot/pass trajectory prediction with physics",
+    },
+    "pressure_strategy": {
+        "source_sports": ["basketball"],
+        "original_research": ["Wang et al. (2018) NBNet", "Double-team decision RL"],
+        "hockey_gap": "RL-optimized forecheck/pinch decisions and pressure timing",
+    },
+    "multiplex_network": {
+        "source_sports": ["soccer"],
+        "original_research": ["CMPN (2023) Chaos, Solitons & Fractals", "Multi-layer networks"],
+        "hockey_gap": "Pass type stratified network analysis for line chemistry",
+    },
+    "phase_detection": {
+        "source_sports": ["soccer"],
+        "original_research": ["Bundesliga CNN (2025)", "Formation classification"],
+        "hockey_gap": "Automated phase of play and formation detection",
+    },
+    "comprehensive_monitoring": {
+        "source_sports": ["soccer", "youth sports"],
+        "original_research": ["PMC youth soccer (2023)", "65-variable monitoring"],
+        "hockey_gap": "Multi-source injury/illness prediction with biomarkers",
+    },
+    "play2vec": {
+        "source_sports": ["basketball"],
+        "original_research": ["Wang et al. (2020) KDD", "Play similarity search"],
+        "hockey_gap": "Play embedding and retrieval for tactical scouting",
+    },
+    "video_analysis": {
+        "source_sports": ["soccer"],
+        "original_research": ["SoccerNet-v2 (2021)", "Action spotting datasets"],
+        "hockey_gap": "Broadcast video action detection and player tracking",
     },
 }
