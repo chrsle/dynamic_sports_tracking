@@ -3,10 +3,13 @@ Hockey Analytics Dashboard Server
 
 FastAPI backend that serves real-time analytics to the web dashboard.
 Connects to video analysis pipeline and streams updates via WebSocket.
+
+Includes Moneyball Analytics for finding undervalued players, plays & strategies.
 """
 
 import asyncio
 import json
+import sys
 from typing import Dict, List, Optional
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
@@ -16,6 +19,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+try:
+    from hockey_moneyball_analytics import MoneyballAnalytics, MoneyballConfig, NHL_SALARY_DATA
+    MONEYBALL_AVAILABLE = True
+except ImportError:
+    MONEYBALL_AVAILABLE = False
+    print("Warning: hockey_moneyball_analytics not found, moneyball features disabled")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -196,6 +209,12 @@ class DashboardState:
 
 state = DashboardState()
 
+# Initialize Moneyball Analytics
+if MONEYBALL_AVAILABLE:
+    moneyball = MoneyballAnalytics(MoneyballConfig())
+else:
+    moneyball = None
+
 
 # ==================== WebSocket Manager ====================
 
@@ -308,6 +327,159 @@ async def websocket_endpoint(websocket: WebSocket):
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+
+# ==================== Moneyball Analytics Endpoints ====================
+
+@app.get("/api/moneyball/status")
+async def get_moneyball_status():
+    """Check if moneyball analytics is available."""
+    return JSONResponse(content={
+        "available": MONEYBALL_AVAILABLE,
+        "players_tracked": len(moneyball.players) if moneyball else 0,
+        "lines_tracked": len(moneyball.line_combinations) if moneyball else 0
+    })
+
+
+@app.post("/api/moneyball/add_player")
+async def add_player(
+    player_id: str,
+    name: str,
+    team: int,
+    position: str = "F",
+    jersey_number: Optional[int] = None,
+    salary: int = 0
+):
+    """Add a player to moneyball tracking."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    moneyball.add_player(player_id, name, team, position, jersey_number, salary)
+    return {"status": "ok", "player_id": player_id}
+
+
+@app.post("/api/moneyball/load_nhl_salaries")
+async def load_nhl_salaries(team_mapping: Dict[str, int]):
+    """Load NHL salary data for players on specified teams."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    for player_id, data in NHL_SALARY_DATA.items():
+        if player_id in team_mapping:
+            moneyball.add_player(
+                player_id=player_id,
+                name=data["name"],
+                team=team_mapping[player_id],
+                position=data["position"],
+                salary=data["salary"]
+            )
+
+    return {"status": "ok", "players_loaded": len(team_mapping)}
+
+
+@app.get("/api/moneyball/undervalued")
+async def get_undervalued_players(min_ice_time: float = 5.0):
+    """Get list of undervalued players (producing more than salary suggests)."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    undervalued = moneyball.find_undervalued_players(min_ice_time)
+    return JSONResponse(content={"undervalued_players": undervalued})
+
+
+@app.get("/api/moneyball/overvalued")
+async def get_overvalued_players(min_ice_time: float = 5.0):
+    """Get list of overvalued players (producing less than salary suggests)."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    overvalued = moneyball.find_overvalued_players(min_ice_time)
+    return JSONResponse(content={"overvalued_players": overvalued})
+
+
+@app.get("/api/moneyball/player/{player_id}")
+async def get_player_value(player_id: str):
+    """Get comprehensive value metrics for a specific player."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    metrics = moneyball.get_player_value_metrics(player_id)
+    if not metrics:
+        return JSONResponse(content={"error": "Player not found"}, status_code=404)
+
+    return JSONResponse(content=metrics)
+
+
+@app.get("/api/moneyball/player/{player_id}/shifts")
+async def get_player_shift_efficiency(player_id: str):
+    """Get shift-by-shift efficiency analysis for a player."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    report = moneyball.get_shift_efficiency_report(player_id)
+    if not report or report.get('no_data'):
+        return JSONResponse(content={"error": "No shift data available"}, status_code=404)
+
+    return JSONResponse(content=report)
+
+
+@app.get("/api/moneyball/lines/best")
+async def get_best_lines(min_ice_time: float = 2.0, top_n: int = 10):
+    """Get best performing line combinations by xG differential."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    lines = moneyball.get_best_line_combinations(min_ice_time, top_n)
+    return JSONResponse(content={"best_lines": lines})
+
+
+@app.get("/api/moneyball/lines/value")
+async def get_best_value_lines(min_ice_time: float = 2.0, top_n: int = 10):
+    """Get line combinations with best value/salary ratio."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    lines = moneyball.get_best_value_lines(min_ice_time, top_n)
+    return JSONResponse(content={"best_value_lines": lines})
+
+
+@app.get("/api/moneyball/team/{team_id}/forecheck")
+async def get_team_forecheck(team_id: int):
+    """Get forechecking pattern analysis for a team."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    analysis = moneyball.get_forecheck_analysis(team_id)
+    return JSONResponse(content=analysis)
+
+
+@app.get("/api/moneyball/team/{team_id}/zone_entries")
+async def get_team_zone_entries(team_id: int):
+    """Get zone entry effectiveness analysis for a team."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    analysis = moneyball.get_zone_entry_analysis(team_id)
+    return JSONResponse(content=analysis)
+
+
+@app.get("/api/moneyball/report")
+async def get_full_moneyball_report():
+    """Get comprehensive moneyball analytics report."""
+    if not moneyball:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    report = moneyball.get_moneyball_report()
+    return JSONResponse(content=report)
+
+
+@app.get("/api/moneyball/salaries")
+async def get_nhl_salary_data():
+    """Get available NHL salary data."""
+    if not MONEYBALL_AVAILABLE:
+        return JSONResponse(content={"error": "Moneyball analytics not available"}, status_code=503)
+
+    return JSONResponse(content={"salary_data": NHL_SALARY_DATA})
 
 
 # ==================== Video Processing ====================
@@ -562,6 +734,15 @@ def update_state_from_analytics(analytics: Dict):
         if len(state.analytics.shots) > 100:
             state.analytics.shots = state.analytics.shots[-100:]
 
+        # Update moneyball tracking for scoring chances
+        if moneyball and shot_data.get("shooter_id"):
+            moneyball.track_scoring_chance(
+                player_id=shot_data["shooter_id"],
+                xg=shot_data["xg"],
+                frame=state.analytics.frame,
+                resulted_in_goal=(shot_data["result"] == "goal")
+            )
+
     if "goalie_positions" in analytics:
         for team, pos in analytics["goalie_positions"].items():
             state.analytics.goalie_positions[team] = GoaliePosition(**pos)
@@ -580,19 +761,42 @@ def update_state_from_analytics(analytics: Dict):
         if len(state.analytics.xg_timeline) > 500:
             state.analytics.xg_timeline = state.analytics.xg_timeline[-500:]
 
+    # Update moneyball frame counter
+    if moneyball:
+        moneyball.update_frame(state.analytics.frame)
+
+    # Track zone entries for moneyball
+    if moneyball and "zone_entry" in analytics:
+        entry = analytics["zone_entry"]
+        moneyball.track_zone_entry(
+            player_id=entry["player_id"],
+            entry_type=entry["type"],
+            success=entry["success"],
+            frame=state.analytics.frame,
+            resulted_in_shot=entry.get("resulted_in_shot", False),
+            xg_generated=entry.get("xg_generated", 0)
+        )
+
 
 # ==================== Run Server ====================
 
 def run_server(host: str = "0.0.0.0", port: int = 8000):
     """Run the dashboard server."""
+    moneyball_status = "ENABLED" if MONEYBALL_AVAILABLE else "DISABLED"
     print(f"""
-    ╔══════════════════════════════════════════════════════════╗
-    ║           Hockey Analytics Dashboard Server               ║
-    ╠══════════════════════════════════════════════════════════╣
-    ║  Dashboard:  http://{host}:{port}                          ║
-    ║  API Docs:   http://{host}:{port}/docs                     ║
-    ║  WebSocket:  ws://{host}:{port}/ws                         ║
-    ╚══════════════════════════════════════════════════════════╝
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║              Hockey Analytics Dashboard Server                    ║
+    ╠══════════════════════════════════════════════════════════════════╣
+    ║  Dashboard:    http://{host}:{port}                                ║
+    ║  API Docs:     http://{host}:{port}/docs                           ║
+    ║  WebSocket:    ws://{host}:{port}/ws                               ║
+    ╠══════════════════════════════════════════════════════════════════╣
+    ║  MONEYBALL ANALYTICS: {moneyball_status:8}                                ║
+    ║    - Undervalued:  GET /api/moneyball/undervalued                 ║
+    ║    - Best Lines:   GET /api/moneyball/lines/best                  ║
+    ║    - Value Lines:  GET /api/moneyball/lines/value                 ║
+    ║    - Full Report:  GET /api/moneyball/report                      ║
+    ╚══════════════════════════════════════════════════════════════════╝
     """)
 
     uvicorn.run(app, host=host, port=port)
