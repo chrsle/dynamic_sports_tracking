@@ -1,0 +1,30 @@
+[Unit]
+Description=Hockey Analytics Dashboard
+Documentation=https://github.com/chrsle/dynamic_sports_tracking
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/hockey-analytics
+Environment="PATH=/opt/hockey-analytics/venv/bin"
+EnvironmentFile=/opt/hockey-analytics/.env
+ExecStart=/opt/hockey-analytics/venv/bin/gunicorn -c gunicorn.conf.py dashboard.server:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/hockey-analytics/dashboard/uploads /opt/hockey-analytics/logs
+
+[Install]
+WantedBy=multi-user.target
