@@ -8,7 +8,7 @@ Connects to video analysis pipeline and streams updates via WebSocket.
 import asyncio
 import json
 from typing import Dict, List, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
@@ -78,6 +78,49 @@ class PositionQuality:
 
 
 @dataclass
+class Shot:
+    """Individual shot data."""
+    x: float
+    y: float
+    team: str  # 'home' or 'away'
+    xg: float
+    result: str  # 'goal', 'save', 'miss', 'block'
+    time: float  # game time in seconds
+    period: int
+    shooter_id: Optional[int] = None
+
+
+@dataclass
+class GoaliePosition:
+    """Goalie position tracking."""
+    x: float
+    y: float
+    team: str
+    depth: float  # distance from goal line
+    angle: float  # angle coverage
+    quality: str  # 'optimal', 'good', 'vulnerable', 'out_of_position'
+
+
+@dataclass
+class PowerPlayState:
+    """Power play tracking."""
+    is_power_play: bool
+    team_with_advantage: Optional[str]  # 'home', 'away', or None
+    home_players: int
+    away_players: int
+    time_remaining: float  # seconds remaining in PP
+    type: str  # '5v4', '5v3', '4v3', 'even'
+
+
+@dataclass
+class XGTimelinePoint:
+    """Point in xG timeline."""
+    time: float
+    home_xg: float
+    away_xg: float
+
+
+@dataclass
 class AnalyticsState:
     """Current state of all analytics."""
     teams: Dict[str, str]
@@ -88,6 +131,18 @@ class AnalyticsState:
     positions: PositionQuality
     insights: List[Dict]
     frame: int = 0
+    # New fields for enhanced analytics
+    shots: List[Shot] = field(default_factory=list)
+    goalie_positions: Dict[str, GoaliePosition] = field(default_factory=dict)
+    power_play: PowerPlayState = field(default_factory=lambda: PowerPlayState(
+        is_power_play=False,
+        team_with_advantage=None,
+        home_players=5,
+        away_players=5,
+        time_remaining=0,
+        type='even'
+    ))
+    xg_timeline: List[XGTimelinePoint] = field(default_factory=list)
 
 
 # Global state
@@ -103,7 +158,14 @@ class DashboardState:
                 "away": ZoneTime(33, 34, 33)
             },
             positions=PositionQuality(0, 0, 0, 0),
-            insights=[]
+            insights=[],
+            shots=[],
+            goalie_positions={
+                "home": GoaliePosition(-85, 0, "home", 5, 30, "optimal"),
+                "away": GoaliePosition(85, 0, "away", 5, 30, "optimal")
+            },
+            power_play=PowerPlayState(False, None, 5, 5, 0, "even"),
+            xg_timeline=[]
         )
         self.connections: List[WebSocket] = []
         self.is_processing = False
@@ -121,7 +183,14 @@ class DashboardState:
             },
             "positions": asdict(self.analytics.positions),
             "insights": self.analytics.insights,
-            "frame": self.analytics.frame
+            "frame": self.analytics.frame,
+            # New fields
+            "shots": [asdict(s) for s in self.analytics.shots],
+            "goaliePositions": {
+                k: asdict(v) for k, v in self.analytics.goalie_positions.items()
+            },
+            "powerPlay": asdict(self.analytics.power_play),
+            "xgTimeline": [asdict(p) for p in self.analytics.xg_timeline]
         }
 
 
@@ -338,9 +407,91 @@ async def process_frame_analytics(frame, frame_number: int) -> Dict:
     ```
     """
     import random
+    import math
 
     # Simulated analytics - replace with actual pipeline
     momentum = (random.random() - 0.5) * 2
+    game_time = frame_number / 30  # Approximate seconds
+
+    # Calculate cumulative xG
+    home_xg = frame_number * 0.001 * (1 + momentum)
+    away_xg = frame_number * 0.001 * (1 - momentum)
+
+    # Generate shot events (occasionally)
+    new_shot = None
+    if random.random() > 0.98:  # ~2% chance per frame
+        shot_team = "home" if random.random() > 0.45 else "away"
+        # Shot position in offensive zone
+        if shot_team == "home":
+            shot_x = 50 + random.random() * 40  # Right side (attacking)
+            shot_y = (random.random() - 0.5) * 60
+        else:
+            shot_x = -50 - random.random() * 40  # Left side (attacking)
+            shot_y = (random.random() - 0.5) * 60
+
+        # Calculate xG based on distance to goal
+        goal_x = 89 if shot_team == "home" else -89
+        dist = math.sqrt((shot_x - goal_x)**2 + shot_y**2)
+        shot_xg = max(0.02, min(0.5, 0.4 - dist * 0.008))
+
+        # Determine result
+        rand = random.random()
+        if rand < shot_xg:
+            result = "goal"
+        elif rand < shot_xg + 0.6:
+            result = "save"
+        elif rand < shot_xg + 0.75:
+            result = "miss"
+        else:
+            result = "block"
+
+        new_shot = {
+            "x": shot_x,
+            "y": shot_y,
+            "team": shot_team,
+            "xg": shot_xg,
+            "result": result,
+            "time": game_time,
+            "period": min(3, int(game_time / 1200) + 1)
+        }
+
+    # Goalie positions (simulated movement)
+    goalie_home = {
+        "x": -85 + random.uniform(-3, 3),
+        "y": random.uniform(-8, 8),
+        "team": "home",
+        "depth": 5 + random.uniform(-2, 5),
+        "angle": 28 + random.uniform(-5, 5),
+        "quality": random.choice(["optimal", "optimal", "good", "good", "vulnerable"])
+    }
+    goalie_away = {
+        "x": 85 + random.uniform(-3, 3),
+        "y": random.uniform(-8, 8),
+        "team": "away",
+        "depth": 5 + random.uniform(-2, 5),
+        "angle": 28 + random.uniform(-5, 5),
+        "quality": random.choice(["optimal", "optimal", "good", "good", "vulnerable"])
+    }
+
+    # Power play state (simulate occasional power plays)
+    is_pp = random.random() > 0.92
+    pp_state = {
+        "is_power_play": is_pp,
+        "team_with_advantage": random.choice(["home", "away"]) if is_pp else None,
+        "home_players": 5 if not is_pp or random.random() > 0.5 else 4,
+        "away_players": 5 if not is_pp or random.random() > 0.5 else 4,
+        "time_remaining": random.uniform(30, 120) if is_pp else 0,
+        "type": "5v4" if is_pp else "even"
+    }
+    # Fix player counts based on advantage
+    if is_pp:
+        if pp_state["team_with_advantage"] == "home":
+            pp_state["home_players"] = 5
+            pp_state["away_players"] = 4
+        else:
+            pp_state["home_players"] = 4
+            pp_state["away_players"] = 5
+        pp_state["type"] = f"{pp_state['home_players']}v{pp_state['away_players']}"
 
     return {
         "signal": {
@@ -356,14 +507,26 @@ async def process_frame_analytics(frame, frame_number: int) -> Dict:
             "trend": "increasing_home" if momentum > 0.3 else "increasing_away" if momentum < -0.3 else "stable"
         },
         "xg": {
-            "home": frame_number * 0.001 * (1 + momentum),
-            "away": frame_number * 0.001 * (1 - momentum)
+            "home": home_xg,
+            "away": away_xg
         },
         "positions": {
             "optimal": random.randint(2, 4),
             "good": random.randint(3, 5),
             "suboptimal": random.randint(1, 3),
             "critical": random.randint(0, 2)
+        },
+        # New analytics fields
+        "new_shot": new_shot,
+        "goalie_positions": {
+            "home": goalie_home,
+            "away": goalie_away
+        },
+        "power_play": pp_state,
+        "xg_timeline_point": {
+            "time": game_time,
+            "home_xg": home_xg,
+            "away_xg": away_xg
         }
     }
 
@@ -381,6 +544,41 @@ def update_state_from_analytics(analytics: Dict):
 
     if "positions" in analytics:
         state.analytics.positions = PositionQuality(**analytics["positions"])
+
+    # New analytics fields
+    if "new_shot" in analytics and analytics["new_shot"] is not None:
+        shot_data = analytics["new_shot"]
+        new_shot = Shot(
+            x=shot_data["x"],
+            y=shot_data["y"],
+            team=shot_data["team"],
+            xg=shot_data["xg"],
+            result=shot_data["result"],
+            time=shot_data["time"],
+            period=shot_data["period"]
+        )
+        state.analytics.shots.append(new_shot)
+        # Keep last 100 shots
+        if len(state.analytics.shots) > 100:
+            state.analytics.shots = state.analytics.shots[-100:]
+
+    if "goalie_positions" in analytics:
+        for team, pos in analytics["goalie_positions"].items():
+            state.analytics.goalie_positions[team] = GoaliePosition(**pos)
+
+    if "power_play" in analytics:
+        state.analytics.power_play = PowerPlayState(**analytics["power_play"])
+
+    if "xg_timeline_point" in analytics:
+        point = analytics["xg_timeline_point"]
+        state.analytics.xg_timeline.append(XGTimelinePoint(
+            time=point["time"],
+            home_xg=point["home_xg"],
+            away_xg=point["away_xg"]
+        ))
+        # Keep last 500 points (for timeline chart)
+        if len(state.analytics.xg_timeline) > 500:
+            state.analytics.xg_timeline = state.analytics.xg_timeline[-500:]
 
 
 # ==================== Run Server ====================

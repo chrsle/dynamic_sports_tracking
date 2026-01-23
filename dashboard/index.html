@@ -19,7 +19,14 @@
             <div class="header-center">
                 <div class="matchup">
                     <span class="team home" id="home-team">Home</span>
-                    <span class="score" id="score">0 - 0</span>
+                    <div class="score-container">
+                        <span class="score" id="score">0 - 0</span>
+                        <div class="power-play-indicator" id="power-play-indicator" style="display: none;">
+                            <span class="pp-badge" id="pp-badge">PP</span>
+                            <span class="pp-type" id="pp-type">5v4</span>
+                            <span class="pp-time" id="pp-time">1:30</span>
+                        </div>
+                    </div>
                     <span class="team away" id="away-team">Away</span>
                 </div>
             </div>
@@ -76,6 +83,7 @@
                     <div class="view-toggle">
                         <button class="toggle-btn active" data-view="heatmap">Heatmap</button>
                         <button class="toggle-btn" data-view="positions">Positions</button>
+                        <button class="toggle-btn" data-view="shotmap">Shot Map</button>
                         <button class="toggle-btn" data-view="hotspots">Hotspots</button>
                     </div>
                 </div>
@@ -94,6 +102,29 @@
                         <div class="legend-item">
                             <span class="legend-color puck"></span>
                             <span>Puck</span>
+                        </div>
+                        <div class="legend-item legend-goalie">
+                            <span class="legend-color goalie"></span>
+                            <span>Goalie</span>
+                        </div>
+                    </div>
+                    <!-- Shot map legend (shown when shot map view active) -->
+                    <div class="shot-legend" id="shot-legend" style="display: none;">
+                        <div class="legend-item">
+                            <span class="shot-marker goal"></span>
+                            <span>Goal</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="shot-marker save"></span>
+                            <span>Save</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="shot-marker miss"></span>
+                            <span>Miss</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="shot-marker block"></span>
+                            <span>Block</span>
                         </div>
                     </div>
                 </div>
@@ -117,6 +148,12 @@
                         <span class="xg-value" id="xg-away">0.00</span>
                         <span class="xg-label">Away xG</span>
                     </div>
+                </div>
+
+                <!-- xG Timeline Chart -->
+                <div class="xg-timeline-section">
+                    <h3>xG Timeline</h3>
+                    <div id="xg-timeline-chart"></div>
                 </div>
 
                 <div class="zone-stats">
@@ -188,6 +225,89 @@
                     <h2>Scoring Chances</h2>
                 </div>
                 <div id="chances-chart"></div>
+            </div>
+        </section>
+
+        <!-- Goalie Tracking Section -->
+        <section class="goalie-section">
+            <div class="panel goalie-panel">
+                <div class="panel-header">
+                    <h2>Goalie Tracking</h2>
+                </div>
+                <div class="goalie-grid">
+                    <div class="goalie-card home">
+                        <div class="goalie-header">
+                            <span class="goalie-team">Home Goalie</span>
+                            <span class="goalie-quality" id="goalie-home-quality">Optimal</span>
+                        </div>
+                        <div class="goalie-stats">
+                            <div class="goalie-stat">
+                                <span class="stat-value" id="goalie-home-depth">5.0</span>
+                                <span class="stat-label">Depth (ft)</span>
+                            </div>
+                            <div class="goalie-stat">
+                                <span class="stat-value" id="goalie-home-angle">28</span>
+                                <span class="stat-label">Angle (%)</span>
+                            </div>
+                            <div class="goalie-stat">
+                                <span class="stat-value" id="goalie-home-position">(0, 0)</span>
+                                <span class="stat-label">Position</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="goalie-card away">
+                        <div class="goalie-header">
+                            <span class="goalie-team">Away Goalie</span>
+                            <span class="goalie-quality" id="goalie-away-quality">Optimal</span>
+                        </div>
+                        <div class="goalie-stats">
+                            <div class="goalie-stat">
+                                <span class="stat-value" id="goalie-away-depth">5.0</span>
+                                <span class="stat-label">Depth (ft)</span>
+                            </div>
+                            <div class="goalie-stat">
+                                <span class="stat-value" id="goalie-away-angle">28</span>
+                                <span class="stat-label">Angle (%)</span>
+                            </div>
+                            <div class="goalie-stat">
+                                <span class="stat-value" id="goalie-away-position">(0, 0)</span>
+                                <span class="stat-label">Position</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel shot-stats-panel">
+                <div class="panel-header">
+                    <h2>Shot Statistics</h2>
+                </div>
+                <div class="shot-stats-grid">
+                    <div class="shot-stat-row">
+                        <span class="shot-stat-label">Total Shots</span>
+                        <span class="shot-stat-value home" id="shots-home">0</span>
+                        <span class="shot-stat-divider">-</span>
+                        <span class="shot-stat-value away" id="shots-away">0</span>
+                    </div>
+                    <div class="shot-stat-row">
+                        <span class="shot-stat-label">Goals</span>
+                        <span class="shot-stat-value home" id="goals-home">0</span>
+                        <span class="shot-stat-divider">-</span>
+                        <span class="shot-stat-value away" id="goals-away">0</span>
+                    </div>
+                    <div class="shot-stat-row">
+                        <span class="shot-stat-label">Saves</span>
+                        <span class="shot-stat-value home" id="saves-home">0</span>
+                        <span class="shot-stat-divider">-</span>
+                        <span class="shot-stat-value away" id="saves-away">0</span>
+                    </div>
+                    <div class="shot-stat-row">
+                        <span class="shot-stat-label">Avg xG/Shot</span>
+                        <span class="shot-stat-value home" id="avg-xg-home">0.00</span>
+                        <span class="shot-stat-divider">-</span>
+                        <span class="shot-stat-value away" id="avg-xg-away">0.00</span>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
