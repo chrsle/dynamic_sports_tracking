@@ -128,6 +128,24 @@ Modules:
     multitask_tracking: Multi-Task Tracking - Joint re-ID,
                        team affiliation, and role classification
 
+    ghosting: Ghosting Model - Optimal defender trajectory
+             simulation and defensive evaluation
+
+    play_designer: Play Designer - Interactive play sketching
+                  with AI-simulated defensive reactions
+
+    micro_action: Micro-Action Evaluation - Sub-second
+                 player action analysis and valuation
+
+    multiagent_strategy: Multi-Agent Strategy - Coordinated
+                        line deployment and tactical optimization
+
+    cap_management: Cap Management - Salary cap optimization
+                   and market inefficiency identification
+
+    sequence_model: Sequence Modeling - Markov/LSTM event
+                   sequence analysis for faceoffs and plays
+
 Research Origins:
     - Soccer: xT (Karun Singh), EPV (Fernández & Bornn), Pitch Control,
               VAEP (Decroos), SoccerCPD (Kim), Football2Vec
@@ -671,6 +689,103 @@ from .multitask_tracking import (
     ModelConfig as TrackingModelConfig,
 )
 
+# Ghosting Model
+from .ghosting import (
+    GhostingModel,
+    DefensiveEvaluator,
+    OptimalPositionCalculator,
+    RoleAssigner as GhostingRoleAssigner,
+    DefensiveRole as GhostingDefensiveRole,
+    DefensiveScheme,
+    PlayerState as GhostingPlayerState,
+    PuckState,
+    GameSnapshot,
+    GhostPosition,
+    GhostingResult,
+    RoleAssignment as GhostingRoleAssignment,
+)
+
+# Play Designer
+from .play_designer import (
+    PlaySimulator,
+    PlayLibrary,
+    DefensiveReactor,
+    PathInterpolator,
+    RinkCanvas,
+    PlayType,
+    ActionType as PlayActionType,
+    PlayerPath,
+    Waypoint,
+    PassEvent as PlayPassEvent,
+    PlayDiagram,
+    SimulationResult,
+)
+
+# Micro-Action Evaluation
+from .micro_action import (
+    ActionDetector,
+    ActionValuator,
+    ShiftAnalyzer,
+    GameAnalyzer,
+    DeepActionEncoder,
+    MicroActionType,
+    ActionContext,
+    TrackingFrame as MicroTrackingFrame,
+    MicroAction,
+    ActionSequence,
+    ShiftEvaluation,
+    ModelConfig as MicroModelConfig,
+)
+
+# Multi-Agent Strategy
+from .multiagent_strategy import (
+    CoordinationOptimizer,
+    RoleAssigner as StrategyRoleAssigner,
+    LineOptimizer,
+    PowerPlayOptimizer,
+    AgentValueFunction,
+    AgentRole,
+    TeamObjective,
+    AgentState,
+    TeamState,
+    AgentAction,
+    TeamAction,
+    CoordinationConstraint,
+)
+
+# Cap Management
+from .cap_management import (
+    CapOptimizer,
+    SurplusValueCalculator,
+    MarketValueEstimator,
+    ContractProjector,
+    TradeAnalyzer,
+    ContractType,
+    ContractStatus,
+    SkillTier,
+    Contract,
+    PlayerValue as CapPlayerValue,
+    CapSituation,
+    RosterDecision,
+    TradeScenario,
+)
+
+# Sequence Modeling
+from .sequence_model import (
+    MarkovSequenceModel,
+    FaceoffSequenceAnalyzer,
+    LSTMSequenceModel,
+    PatternMiner,
+    SequenceValueCalculator,
+    PowerPlaySequenceAnalyzer,
+    ShiftSequenceAnalyzer,
+    EventType,
+    ZoneState,
+    SequenceEvent,
+    EventSequence,
+    SequencePattern,
+)
+
 
 # Convenience functions
 def create_full_analytics_suite(
@@ -845,6 +960,32 @@ def create_full_analytics_suite(
         # Multi-Task Tracking
         'multitask_tracker': MultiTaskTracker(),
 
+        # Ghosting
+        'ghosting_model': GhostingModel(),
+        'defensive_evaluator': DefensiveEvaluator(GhostingModel()),
+
+        # Play Designer
+        'play_simulator': PlaySimulator(),
+        'play_library': PlayLibrary(),
+
+        # Micro-Action
+        'action_detector': ActionDetector(),
+        'shift_analyzer': ShiftAnalyzer(),
+
+        # Multi-Agent Strategy
+        'coordination_optimizer': CoordinationOptimizer(),
+        'line_strategy': LineOptimizer(),
+        'pp_optimizer': PowerPlayOptimizer(),
+
+        # Cap Management
+        'cap_optimizer': CapOptimizer(),
+        'trade_analyzer': TradeAnalyzer(),
+
+        # Sequence Modeling
+        'sequence_model': MarkovSequenceModel(),
+        'faceoff_analyzer': FaceoffSequenceAnalyzer(),
+        'pp_sequence': PowerPlaySequenceAnalyzer(),
+
         # Data integration
         'nhl_client': NHLAPIClient(),
     }
@@ -893,6 +1034,12 @@ MODULES = [
     "offline_rl",
     "position_injury",
     "multitask_tracking",
+    "ghosting",
+    "play_designer",
+    "micro_action",
+    "multiagent_strategy",
+    "cap_management",
+    "sequence_model",
 ]
 
 # Research gap mapping
@@ -1096,5 +1243,35 @@ RESEARCH_GAPS = {
         "source_sports": ["soccer"],
         "original_research": ["Multi-task learning (2024)", "PRTReID"],
         "hockey_gap": "Joint re-ID, team affiliation, and role classification",
+    },
+    "ghosting": {
+        "source_sports": ["basketball"],
+        "original_research": ["Lucey et al. (2013) MIT Sloan", "Ghosting optimal positioning"],
+        "hockey_gap": "Counterfactual defender positioning and defensive evaluation",
+    },
+    "play_designer": {
+        "source_sports": ["basketball"],
+        "original_research": ["Bhostgusters (Seidl et al. 2018)", "Interactive play sketching"],
+        "hockey_gap": "AI-assisted play design with simulated defensive reactions",
+    },
+    "micro_action": {
+        "source_sports": ["basketball"],
+        "original_research": ["DeepHoops (Sicilia et al. 2019)", "Micro-action evaluation"],
+        "hockey_gap": "Sub-second action valuation for invisible contributions",
+    },
+    "multiagent_strategy": {
+        "source_sports": ["soccer", "general RL"],
+        "original_research": ["At the Helm (Chu et al. 2020)", "Multi-agent coordination"],
+        "hockey_gap": "Team-level coordinated strategy optimization",
+    },
+    "cap_management": {
+        "source_sports": ["baseball", "basketball"],
+        "original_research": ["Moneyball 2.0 (Brown 2021)", "Market inefficiency analysis"],
+        "hockey_gap": "Salary cap optimization and surplus value identification",
+    },
+    "sequence_model": {
+        "source_sports": ["volleyball", "tennis"],
+        "original_research": ["Rally Analyzer (Wei et al. 2016)", "Markov chain sequences"],
+        "hockey_gap": "Faceoff and power play sequence modeling with Markov/LSTM",
     },
 }
