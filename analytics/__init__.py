@@ -110,6 +110,24 @@ Modules:
     video_analysis: Video Action Spotting - SoccerNet-style
                    video analysis and action detection
 
+    pitch_control: Pitch Control Model - Continuous probability
+                  density for ice control prediction
+
+    defender_trajectory: Defender CNN-LSTM - Neural network
+                        prediction of defensive player trajectories
+
+    hierarchical_rl: Hierarchical RL - Multi-level tactical
+                    optimization from game to play level
+
+    offline_rl: Offline RL - Conservative Q-learning for
+               tactical decisions from historical data
+
+    position_injury: Position-Specific Injury - Position-based
+                    injury prediction with multiple ACWR timeframes
+
+    multitask_tracking: Multi-Task Tracking - Joint re-ID,
+                       team affiliation, and role classification
+
 Research Origins:
     - Soccer: xT (Karun Singh), EPV (Fernández & Bornn), Pitch Control,
               VAEP (Decroos), SoccerCPD (Kim), Football2Vec
@@ -553,6 +571,106 @@ from .video_analysis import (
     CameraView,
 )
 
+# Pitch Control Model
+from .pitch_control import (
+    PitchControlModel,
+    SpaceCreationAnalyzer,
+    PassingLaneAnalyzer,
+    ZoneControlAnalyzer,
+    ControlModel,
+    PlayerState as PitchControlPlayerState,
+    ControlPoint,
+    ControlGrid,
+    SpaceCreation,
+    PassingLane,
+    SkaterPhysics,
+    PuckPhysics,
+)
+
+# Defender Trajectory CNN-LSTM
+from .defender_trajectory import (
+    DefenderTrajectoryModel,
+    BackcheckPredictor,
+    GoaliePositionPredictor,
+    TrajectoryEvaluator as DefenderTrajectoryEvaluator,
+    SocialPoolingLayer,
+    CNNEncoder,
+    LSTMDecoder,
+    DefenderRole,
+    AssignmentType,
+    PlayerFrame,
+    GameFrame as DefenderGameFrame,
+    TrajectoryPrediction as DefenderTrajectoryPrediction,
+    ModelConfig as DefenderModelConfig,
+)
+
+# Hierarchical RL
+from .hierarchical_rl import (
+    HierarchicalRLAgent,
+    HighLevelPolicy,
+    MidLevelPolicy,
+    LowLevelPolicy,
+    OptionsManager,
+    TacticalAdvisor,
+    DecisionLevel,
+    GameStrategy,
+    PeriodTactic,
+    ShiftAction,
+    PlayAction,
+    GameState as HierarchicalGameState,
+    HierarchicalPolicy,
+    OptionFramework,
+)
+
+# Offline RL
+from .offline_rl import (
+    ConservativeQLearning,
+    OfflineRLTrainer,
+    DatasetBuilder,
+    BehaviorCloning,
+    ImplicitQLearning,
+    QNetwork as OfflineQNetwork,
+    ActionSpace as OfflineActionSpace,
+    OutcomeSpace,
+    HistoricalPlay,
+    BatchExperience,
+    CQLConfig,
+)
+
+# Position-Specific Injury Models
+from .position_injury import (
+    InjuryPredictionSystem,
+    PositionSpecificModel,
+    MultiACWRModel,
+    ACWRCalculator as PositionACWRCalculator,
+    MonotonyStrainCalculator,
+    HockeyPosition,
+    InjuryType as PositionInjuryType,
+    SeverityLevel,
+    DailyMetrics,
+    ACWRResult,
+    InjuryRisk,
+    TrainingRecommendation,
+)
+
+# Multi-Task Vision Tracking
+from .multitask_tracking import (
+    MultiTaskTracker,
+    BackboneEncoder,
+    PartBasedEncoder,
+    TeamClassifier,
+    RoleClassifier,
+    JerseyNumberRecognizer,
+    OcclusionHandler,
+    PlayerRole as TrackingPlayerRole,
+    TrackingState,
+    BoundingBox,
+    PlayerDetection,
+    Track,
+    PartFeatures,
+    ModelConfig as TrackingModelConfig,
+)
+
 
 # Convenience functions
 def create_full_analytics_suite(
@@ -702,6 +820,31 @@ def create_full_analytics_suite(
         # Video Analysis
         'video_analyzer': VideoAnalyzer(),
 
+        # Pitch Control
+        'pitch_control': PitchControlModel(),
+        'space_creation': SpaceCreationAnalyzer(PitchControlModel()),
+        'passing_lanes': PassingLaneAnalyzer(PitchControlModel()),
+
+        # Defender Trajectory
+        'defender_trajectory': DefenderTrajectoryModel(),
+        'backcheck_predictor': BackcheckPredictor(DefenderTrajectoryModel()),
+        'goalie_position': GoaliePositionPredictor(),
+
+        # Hierarchical RL
+        'hierarchical_agent': HierarchicalRLAgent(),
+        'tactical_advisor': TacticalAdvisor(HierarchicalRLAgent()),
+
+        # Offline RL
+        'offline_rl': ConservativeQLearning(CQLConfig()),
+        'offline_trainer': OfflineRLTrainer(),
+
+        # Position-Specific Injury
+        'position_injury': InjuryPredictionSystem(),
+        'multi_acwr': MultiACWRModel(),
+
+        # Multi-Task Tracking
+        'multitask_tracker': MultiTaskTracker(),
+
         # Data integration
         'nhl_client': NHLAPIClient(),
     }
@@ -744,6 +887,12 @@ MODULES = [
     "comprehensive_monitoring",
     "play2vec",
     "video_analysis",
+    "pitch_control",
+    "defender_trajectory",
+    "hierarchical_rl",
+    "offline_rl",
+    "position_injury",
+    "multitask_tracking",
 ]
 
 # Research gap mapping
@@ -917,5 +1066,35 @@ RESEARCH_GAPS = {
         "source_sports": ["soccer"],
         "original_research": ["SoccerNet-v2 (2021)", "Action spotting datasets"],
         "hockey_gap": "Broadcast video action detection and player tracking",
+    },
+    "pitch_control": {
+        "source_sports": ["soccer"],
+        "original_research": ["Spearman (2018)", "Fernández & Bornn (2018)"],
+        "hockey_gap": "Continuous probability density for ice control prediction",
+    },
+    "defender_trajectory": {
+        "source_sports": ["football"],
+        "original_research": ["Amazon Science Defender CNN-LSTM", "Social pooling"],
+        "hockey_gap": "Neural network prediction of defensive player trajectories",
+    },
+    "hierarchical_rl": {
+        "source_sports": ["basketball", "soccer"],
+        "original_research": ["Meng (2025) Hierarchical RL", "Options framework"],
+        "hockey_gap": "Multi-level tactical optimization from game to play level",
+    },
+    "offline_rl": {
+        "source_sports": ["basketball"],
+        "original_research": ["ReLiable (2022) CIKM", "Conservative Q-Learning"],
+        "hockey_gap": "Tactical decisions from historical play-by-play data",
+    },
+    "position_injury": {
+        "source_sports": ["rugby"],
+        "original_research": ["GPS metrics ML (2025)", "Multiple ACWR timeframes"],
+        "hockey_gap": "Position-specific injury prediction with role-based features",
+    },
+    "multitask_tracking": {
+        "source_sports": ["soccer"],
+        "original_research": ["Multi-task learning (2024)", "PRTReID"],
+        "hockey_gap": "Joint re-ID, team affiliation, and role classification",
     },
 }
