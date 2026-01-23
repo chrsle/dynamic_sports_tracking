@@ -41,17 +41,40 @@ Modules:
     shooter_gravity: Shooter Gravity Metrics - Defensive attention
                     and space creation measurement
 
+    win_probability: Bayesian Win Probability Model - Real-time
+                    win probability with strength states and momentum
+
+    vaep: VAEP (Valuing Actions by Estimating Probabilities) -
+          Action-level valuation considering sequences and defense
+
+    player_embeddings: NHL2Vec Player Embeddings - Dense vector
+                      representations for similarity and chemistry
+
+    tactical_detection: Tactical/Formation Detection - System
+                       classification and change-point detection
+
+    trajectory_prediction: Player Trajectory Prediction - Social LSTM
+                          based movement prediction and ghosting
+
+    play_recognition: Play Pattern Recognition - NETS-inspired
+                     group activity recognition for hockey plays
+
 Research Origins:
-    - Soccer: xT (Karun Singh), EPV (Fernández & Bornn), Pitch Control
-    - Basketball: EPV (Cervone), RAPTOR/EPM, Gravity metrics
+    - Soccer: xT (Karun Singh), EPV (Fernández & Bornn), Pitch Control,
+              VAEP (Decroos), SoccerCPD (Kim), Football2Vec
+    - Basketball: EPV (Cervone), RAPTOR/EPM, Gravity metrics,
+                  NBA2Vec, Social LSTM, NETS
     - Baseball: Pitch tunneling, Seam-shifted wake (Dr. Barton Smith)
-    - Football: ACWR injury prediction, GNN passing networks
+    - Football: ACWR injury prediction, GNN passing networks,
+                Win probability models, Defender CNN-LSTM
 
 References:
     - MIT Sloan Sports Analytics Conference papers
     - LINHAC (Linköping Hockey Analytics Conference)
     - ML-KULeuven/socceraction library
     - FiveThirtyEight RAPTOR methodology
+    - ACM SIGKDD sports analytics papers
+    - AAAI Workshop on AI in Team Sports
 """
 
 __version__ = "1.0.0"
@@ -160,6 +183,75 @@ from .shooter_gravity import (
     GravityEvent,
 )
 
+# Win probability
+from .win_probability import (
+    HockeyWinProbability,
+    WinProbabilityTracker,
+    GameContext,
+    WinProbabilityResult,
+    GameState as WPGameState,
+    StrengthState as WPStrengthState,
+)
+
+# VAEP action valuation
+from .vaep import (
+    HockeyVAEP,
+    VAEPAccumulator,
+    HADLAction,
+    VAEPValue,
+    ActionType as VAEPActionType,
+    ActionResult,
+)
+
+# Player embeddings
+from .player_embeddings import (
+    NHL2Vec,
+    PlayerRecommendationSystem,
+    Action2Vec,
+    PlayerStats,
+    PlayerEmbedding,
+    Position,
+    PlayerRole,
+)
+
+# Tactical detection
+from .tactical_detection import (
+    HockeyTacticalDetector,
+    TacticalTrendAnalyzer,
+    DefensiveSystem,
+    OffensiveSystem,
+    PowerPlayFormation,
+    PenaltyKillFormation,
+    GamePhase,
+    FormationAnalysis,
+    TacticalChangePoint,
+)
+
+# Trajectory prediction
+from .trajectory_prediction import (
+    HockeyTrajectoryPredictor,
+    GhostingAnalyzer,
+    GoalieTrajectoryModel,
+    TrajectoryEvaluator,
+    TrajectoryPrediction,
+    TrackingFrame,
+    GhostingResult,
+)
+
+# Play recognition
+from .play_recognition import (
+    NETSPlayRecognizer,
+    PlayPatternMatcher,
+    PlaySimilaritySearch,
+    PlayEffectivenessAnalyzer,
+    OffensivePlay,
+    DefensivePlay,
+    SpecialTeamsPlay,
+    PlayRecognition,
+    PlaySequence,
+    GameFrame,
+)
+
 
 # Convenience functions
 def create_full_analytics_suite(
@@ -176,19 +268,59 @@ def create_full_analytics_suite(
     Returns:
         Dictionary with all initialized models
     """
+    # Initialize NHL2Vec for player embeddings
+    nhl2vec = NHL2Vec()
+
     return {
+        # Core valuation models
         'xT': HockeyExpectedThreat(grid_length=grid_x, grid_width=grid_y),
         'zone_entry_xT': ZoneEntryxT(),
+        'vaep': HockeyVAEP(),
+        'epv': EPVModel(grid_x=grid_x * 2, grid_y=grid_y * 2),
+
+        # Shot/scoring analysis
         'shot_deception': ShotDeceptionAnalyzer(),
+        'gravity': ShooterGravityModel(),
+
+        # Team/player analysis
         'line_chemistry': LineChemistryPredictor(),
+        'nhl2vec': nhl2vec,
+        'player_recommendation': PlayerRecommendationSystem(nhl2vec),
+
+        # Workload and injury
         'acwr': ACWRModel(),
+
+        # Goalie analysis
         'goalie': GoalieAnalyzer(),
+
+        # Spatial analysis
         'ice_control': IceControlModel(),
         'obso': OBSOModel(),
+
+        # Transition and rush
         'rush': RushSuccessModel(),
         'transition': TransitionSpeedAnalyzer(),
-        'epv': EPVModel(grid_x=grid_x * 2, grid_y=grid_y * 2),
-        'gravity': ShooterGravityModel(),
+
+        # Win probability
+        'win_probability': HockeyWinProbability(),
+        'wp_tracker': WinProbabilityTracker(),
+
+        # Tactical analysis
+        'tactical': HockeyTacticalDetector(),
+        'tactical_trends': TacticalTrendAnalyzer(),
+
+        # Movement prediction
+        'trajectory': HockeyTrajectoryPredictor(),
+        'ghosting': GhostingAnalyzer(HockeyTrajectoryPredictor()),
+        'goalie_trajectory': GoalieTrajectoryModel(),
+
+        # Play recognition
+        'play_recognizer': NETSPlayRecognizer(),
+        'play_patterns': PlayPatternMatcher(),
+        'play_search': PlaySimilaritySearch(),
+        'play_effectiveness': PlayEffectivenessAnalyzer(),
+
+        # Data integration
         'nhl_client': NHLAPIClient(),
     }
 
@@ -207,6 +339,12 @@ MODULES = [
     "nhl_api",
     "epv",
     "shooter_gravity",
+    "win_probability",
+    "vaep",
+    "player_embeddings",
+    "tactical_detection",
+    "trajectory_prediction",
+    "play_recognition",
 ]
 
 # Research gap mapping
@@ -265,5 +403,35 @@ RESEARCH_GAPS = {
         "source_sports": ["basketball"],
         "original_research": ["RAPTOR", "Steph Curry gravity studies"],
         "hockey_gap": "Systematic measurement of defensive attention",
+    },
+    "win_probability": {
+        "source_sports": ["soccer", "football"],
+        "original_research": ["Robberechts Bayesian WP", "NFL Random Forest WP"],
+        "hockey_gap": "Real-time win probability with power play states",
+    },
+    "vaep": {
+        "source_sports": ["soccer"],
+        "original_research": ["Decroos VAEP", "ML-KULeuven SPADL"],
+        "hockey_gap": "Action-level valuation with defensive credit",
+    },
+    "player_embeddings": {
+        "source_sports": ["basketball", "soccer"],
+        "original_research": ["NBA2Vec", "Football2Vec", "Play2Vec"],
+        "hockey_gap": "Dense player representations for similarity/chemistry",
+    },
+    "tactical_detection": {
+        "source_sports": ["soccer"],
+        "original_research": ["SoccerCPD", "Formation identification surveys"],
+        "hockey_gap": "Automated system/formation detection and change points",
+    },
+    "trajectory_prediction": {
+        "source_sports": ["pedestrian", "basketball", "football"],
+        "original_research": ["Social LSTM", "NFL Defender CNN-LSTM", "Ghosting"],
+        "hockey_gap": "Player trajectory prediction and optimal positioning",
+    },
+    "play_recognition": {
+        "source_sports": ["basketball", "soccer"],
+        "original_research": ["NETS", "Play2Vec", "Group activity recognition"],
+        "hockey_gap": "Automatic play pattern recognition from tracking",
     },
 }
