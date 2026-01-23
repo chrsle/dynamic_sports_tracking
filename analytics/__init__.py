@@ -59,6 +59,21 @@ Modules:
     play_recognition: Play Pattern Recognition - NETS-inspired
                      group activity recognition for hockey plays
 
+    rl_decision: RL Decision Optimizer - Reinforcement learning
+                 for line deployment and tactical decisions
+
+    workload_footprint: Advanced Workload Footprint - FWF methodology
+                       for injury prediction and load management
+
+    forechecking: Forechecking Valuation - exPress-based model
+                  for valuing pressure and forechecking actions
+
+    contract_value: Contract/Trade Value Analyzer - SHAP-style
+                   explanations for player valuations
+
+    pass_model: Pass Probability Model - xPass framework
+               for pass success prediction and playmaking
+
 Research Origins:
     - Soccer: xT (Karun Singh), EPV (Fernández & Bornn), Pitch Control,
               VAEP (Decroos), SoccerCPD (Kim), Football2Vec
@@ -252,6 +267,75 @@ from .play_recognition import (
     GameFrame,
 )
 
+# RL Decision Optimizer
+from .rl_decision import (
+    HockeyDQN,
+    LineDeploymentOptimizer,
+    HierarchicalTacticalRL,
+    DecisionEvaluator,
+    Action as RLAction,
+    StrengthState as RLStrengthState,
+    GameZone,
+    GameState as RLGameState,
+    ActionResult as RLActionResult,
+    Experience,
+    QNetwork,
+)
+
+# Advanced Workload Footprint
+from .workload_footprint import (
+    HockeyWorkloadFootprint,
+    InjuryRiskPredictor,
+    RecoveryStatusTracker,
+    DailyWorkload,
+    WorkloadFootprint,
+    InjuryRiskPrediction,
+    Position as WorkloadPosition,
+    InjuryType,
+    RecoveryStatus,
+)
+
+# Forechecking Valuation
+from .forechecking import (
+    HockeyForecheckValuation,
+    ForecheckTracker,
+    BackcheckValuation,
+    ForecheckEvent,
+    PlayerForecheckValue,
+    ForecheckAnalysis,
+    ForecheckType,
+    ForecheckOutcome,
+    PressureSituation,
+    PlayerPosition as ForecheckPlayerPosition,
+)
+
+# Contract/Trade Value Analyzer
+from .contract_value import (
+    HockeyContractValuation,
+    TradeValueAnalyzer,
+    MarketInefficiencyFinder,
+    PlayerPerformance,
+    ContractValuation,
+    TradeValue,
+    ContractStatus,
+    Position as ContractPosition,
+    PerformanceTier,
+)
+
+# Pass Probability Model
+from .pass_model import (
+    HockeyPassModel,
+    DefensivePassAnalyzer,
+    PlaymakingEvaluator,
+    PassAttempt,
+    PassProbability,
+    DefensivePassCredit,
+    PassType as PassModelType,
+    PassOutcome,
+    PassContext,
+    PlayerPosition as PassPlayerPosition,
+)
+
 
 # Convenience functions
 def create_full_analytics_suite(
@@ -320,6 +404,32 @@ def create_full_analytics_suite(
         'play_search': PlaySimilaritySearch(),
         'play_effectiveness': PlayEffectivenessAnalyzer(),
 
+        # RL Decision Optimizer
+        'rl_decision': HockeyDQN(),
+        'line_optimizer': LineDeploymentOptimizer(),
+        'hierarchical_rl': HierarchicalTacticalRL(),
+        'decision_evaluator': DecisionEvaluator(),
+
+        # Advanced Workload Footprint
+        'workload_footprint': HockeyWorkloadFootprint(),
+        'injury_predictor': InjuryRiskPredictor(),
+        'recovery_tracker': RecoveryStatusTracker(),
+
+        # Forechecking Valuation
+        'forecheck': HockeyForecheckValuation(),
+        'forecheck_tracker': ForecheckTracker(),
+        'backcheck': BackcheckValuation(),
+
+        # Contract/Trade Value
+        'contract_value': HockeyContractValuation(),
+        'trade_analyzer': TradeValueAnalyzer(),
+        'market_inefficiency': MarketInefficiencyFinder(),
+
+        # Pass Probability Model
+        'pass_model': HockeyPassModel(),
+        'defensive_pass': DefensivePassAnalyzer(),
+        'playmaking': PlaymakingEvaluator(),
+
         # Data integration
         'nhl_client': NHLAPIClient(),
     }
@@ -345,6 +455,11 @@ MODULES = [
     "tactical_detection",
     "trajectory_prediction",
     "play_recognition",
+    "rl_decision",
+    "workload_footprint",
+    "forechecking",
+    "contract_value",
+    "pass_model",
 ]
 
 # Research gap mapping
@@ -433,5 +548,30 @@ RESEARCH_GAPS = {
         "source_sports": ["basketball", "soccer"],
         "original_research": ["NETS", "Play2Vec", "Group activity recognition"],
         "hockey_gap": "Automatic play pattern recognition from tracking",
+    },
+    "rl_decision": {
+        "source_sports": ["soccer", "basketball"],
+        "original_research": ["Q-Ball", "ReLiable", "Deep RL decision-making"],
+        "hockey_gap": "RL-based line deployment and tactical decisions",
+    },
+    "workload_footprint": {
+        "source_sports": ["soccer", "rugby"],
+        "original_research": ["FWF methodology", "GPS load monitoring"],
+        "hockey_gap": "Advanced workload footprint with shift-level tracking",
+    },
+    "forechecking": {
+        "source_sports": ["soccer"],
+        "original_research": ["exPress", "PPDA", "Pressing intensity"],
+        "hockey_gap": "Systematic forechecking and backcheck valuation",
+    },
+    "contract_value": {
+        "source_sports": ["baseball", "basketball"],
+        "original_research": ["SHAP value explanations", "WAR-based contracts"],
+        "hockey_gap": "Explainable contract valuations with market analysis",
+    },
+    "pass_model": {
+        "source_sports": ["soccer"],
+        "original_research": ["xPass", "GCN passing networks", "Pass success models"],
+        "hockey_gap": "Pass completion probability with defensive credit",
     },
 }
