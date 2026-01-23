@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hockey Analytics Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">Hockey Analytics</h1>
+                <span class="badge live">LIVE</span>
+            </div>
+            <div class="header-center">
+                <div class="matchup">
+                    <span class="team home" id="home-team">Home</span>
+                    <span class="score" id="score">0 - 0</span>
+                    <span class="team away" id="away-team">Away</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <span class="period" id="period">1st Period</span>
+                <span class="time" id="game-time">20:00</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Column - Betting Signals -->
+            <section class="panel betting-panel">
+                <div class="panel-header">
+                    <h2>Betting Signal</h2>
+                    <span class="update-time" id="signal-update">Updated just now</span>
+                </div>
+
+                <div class="signal-display">
+                    <div class="signal-indicator" id="signal-indicator">
+                        <span class="signal-text" id="signal-text">NEUTRAL</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidence-fill"></div>
+                        <span class="confidence-value" id="confidence-value">50%</span>
+                    </div>
+                </div>
+
+                <div class="signal-reasons" id="signal-reasons">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="momentum-section">
+                    <h3>Momentum</h3>
+                    <div class="momentum-bar">
+                        <span class="momentum-label home">Home</span>
+                        <div class="momentum-track">
+                            <div class="momentum-fill" id="momentum-fill"></div>
+                            <div class="momentum-marker" id="momentum-marker"></div>
+                        </div>
+                        <span class="momentum-label away">Away</span>
+                    </div>
+                    <div class="momentum-trend" id="momentum-trend">
+                        <span class="trend-icon">→</span>
+                        <span class="trend-text">Stable</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center Column - Rink View -->
+            <section class="panel rink-panel">
+                <div class="panel-header">
+                    <h2>Ice Surface</h2>
+                    <div class="view-toggle">
+                        <button class="toggle-btn active" data-view="heatmap">Heatmap</button>
+                        <button class="toggle-btn" data-view="positions">Positions</button>
+                        <button class="toggle-btn" data-view="hotspots">Hotspots</button>
+                    </div>
+                </div>
+
+                <div class="rink-container">
+                    <canvas id="rink-canvas" width="600" height="255"></canvas>
+                    <div class="rink-legend" id="rink-legend">
+                        <div class="legend-item">
+                            <span class="legend-color home"></span>
+                            <span>Home Team</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color away"></span>
+                            <span>Away Team</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color puck"></span>
+                            <span>Puck</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column - Stats -->
+            <section class="panel stats-panel">
+                <div class="panel-header">
+                    <h2>Expected Goals</h2>
+                </div>
+
+                <div class="xg-display">
+                    <div class="xg-team">
+                        <span class="xg-value" id="xg-home">0.00</span>
+                        <span class="xg-label">Home xG</span>
+                    </div>
+                    <div class="xg-comparison">
+                        <div id="xg-chart"></div>
+                    </div>
+                    <div class="xg-team">
+                        <span class="xg-value" id="xg-away">0.00</span>
+                        <span class="xg-label">Away xG</span>
+                    </div>
+                </div>
+
+                <div class="zone-stats">
+                    <h3>Zone Time</h3>
+                    <div class="zone-bars">
+                        <div class="zone-row">
+                            <span class="zone-label">Offensive</span>
+                            <div class="zone-bar-container">
+                                <div class="zone-bar home" id="zone-off-home"></div>
+                                <div class="zone-bar away" id="zone-off-away"></div>
+                            </div>
+                        </div>
+                        <div class="zone-row">
+                            <span class="zone-label">Neutral</span>
+                            <div class="zone-bar-container">
+                                <div class="zone-bar home" id="zone-neu-home"></div>
+                                <div class="zone-bar away" id="zone-neu-away"></div>
+                            </div>
+                        </div>
+                        <div class="zone-row">
+                            <span class="zone-label">Defensive</span>
+                            <div class="zone-bar-container">
+                                <div class="zone-bar home" id="zone-def-home"></div>
+                                <div class="zone-bar away" id="zone-def-away"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Section - Insights & Alerts -->
+        <section class="bottom-section">
+            <div class="panel insights-panel">
+                <div class="panel-header">
+                    <h2>Live Insights</h2>
+                </div>
+                <div class="insights-feed" id="insights-feed">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="panel positions-panel">
+                <div class="panel-header">
+                    <h2>Position Quality</h2>
+                </div>
+                <div class="position-grid">
+                    <div class="position-card optimal">
+                        <span class="position-count" id="pos-optimal">0</span>
+                        <span class="position-label">Optimal</span>
+                    </div>
+                    <div class="position-card good">
+                        <span class="position-count" id="pos-good">0</span>
+                        <span class="position-label">Good</span>
+                    </div>
+                    <div class="position-card suboptimal">
+                        <span class="position-count" id="pos-suboptimal">0</span>
+                        <span class="position-label">Suboptimal</span>
+                    </div>
+                    <div class="position-card critical">
+                        <span class="position-count" id="pos-critical">0</span>
+                        <span class="position-label">Critical</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel danger-panel">
+                <div class="panel-header">
+                    <h2>Scoring Chances</h2>
+                </div>
+                <div id="chances-chart"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
