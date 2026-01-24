@@ -1,6 +1,7 @@
 /*
  * Hockey Analytics Dashboard
- * Clean, minimal Sigma-style design
+ * Sigma Computing Design System
+ * Clean, minimal, data-focused interface
  */
 
 /* Reset & Base */
@@ -11,66 +12,106 @@
 }
 
 :root {
-    /* Colors - Clean & Minimal */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --bg-tertiary: #f1f3f4;
+    /* Sigma Computing Color Palette */
+    --sigma-charcoal: #292929;
+    --sigma-dark: #3d3d3d;
+    --sigma-gray-600: #575757;
+    --sigma-gray-500: #757575;
+    --sigma-gray-400: #9fa8a7;
+    --sigma-gray-300: #c4c4c4;
+    --sigma-gray-200: #e0e0e0;
+    --sigma-gray-100: #f0f0f0;
+    --sigma-white: #ffffff;
 
-    --text-primary: #1a1a2e;
-    --text-secondary: #5f6368;
-    --text-tertiary: #9aa0a6;
+    /* Sigma Accent Colors */
+    --sigma-accent: #F0FF45;
+    --sigma-accent-hover: #e0ef35;
+    --sigma-orange: #FF9A74;
+    --sigma-highlight: #F59A23;
 
-    --border-color: #e8eaed;
-    --border-light: #f1f3f4;
+    /* Sigma Categorical Colors (for data) */
+    --sigma-blue: #1976D2;
+    --sigma-yellow: #F6BD16;
+    --sigma-red: #EF5350;
+    --sigma-cyan: #52CBFF;
+    --sigma-green: #2A8D5C;
+    --sigma-orange-data: #FB9649;
+    --sigma-purple: #6E4BD2;
+    --sigma-lime: #87DC44;
+    --sigma-pink: #F72585;
+    --sigma-teal: #68DFC5;
 
-    /* Team Colors */
-    --home-color: #1a73e8;
-    --home-light: #e8f0fe;
-    --away-color: #ea4335;
-    --away-light: #fce8e6;
-
-    /* Signal Colors */
-    --signal-strong-home: #1a73e8;
-    --signal-lean-home: #4285f4;
-    --signal-neutral: #9aa0a6;
-    --signal-lean-away: #f28b82;
-    --signal-strong-away: #ea4335;
+    /* Team Colors (using Sigma categorical) */
+    --home-color: #1976D2;
+    --home-light: rgba(25, 118, 210, 0.1);
+    --home-medium: rgba(25, 118, 210, 0.2);
+    --away-color: #EF5350;
+    --away-light: rgba(239, 83, 80, 0.1);
+    --away-medium: rgba(239, 83, 80, 0.2);
 
     /* Status Colors */
-    --success: #34a853;
-    --warning: #fbbc04;
-    --danger: #ea4335;
-    --info: #4285f4;
+    --success: #2A8D5C;
+    --success-light: rgba(42, 141, 92, 0.1);
+    --warning: #F6BD16;
+    --warning-light: rgba(246, 189, 22, 0.1);
+    --danger: #EF5350;
+    --danger-light: rgba(239, 83, 80, 0.1);
+    --info: #52CBFF;
+    --info-light: rgba(82, 203, 255, 0.1);
 
-    /* Spacing */
+    /* Background & Surface */
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-elevated: #ffffff;
+
+    /* Text */
+    --text-primary: #292929;
+    --text-secondary: #575757;
+    --text-tertiary: #9fa8a7;
+    --text-inverse: #ffffff;
+
+    /* Borders */
+    --border-color: #e0e0e0;
+    --border-light: #f0f0f0;
+    --border-focus: #1976D2;
+
+    /* Spacing - 4px base */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
     --spacing-md: 16px;
     --spacing-lg: 24px;
     --spacing-xl: 32px;
+    --spacing-2xl: 48px;
 
-    /* Border Radius */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 16px;
+    /* Border Radius - Sigma minimal */
+    --radius-none: 0;
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+    /* Shadows - Subtle */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.08);
+    --shadow-focus: 0 0 0 2px rgba(25, 118, 210, 0.2);
 
-    /* Typography */
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* Typography - Sigma uses Raleway as primary font */
+    --font-family: 'Raleway', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
+
+    /* Transitions - Sigma smooth */
+    --transition-fast: 150ms ease;
+    --transition-normal: 225ms ease;
 }
 
 body {
     font-family: var(--font-family);
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.5;
+    font-size: 14px;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Dashboard Layout */
@@ -80,17 +121,18 @@ body {
     flex-direction: column;
 }
 
-/* Header */
+/* ==================== Header - Sigma Style ==================== */
 .header {
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
-    padding: var(--spacing-md) var(--spacing-xl);
+    padding: var(--spacing-sm) var(--spacing-lg);
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: var(--shadow-sm);
 }
 
 .header-left {
@@ -100,24 +142,24 @@ body {
 }
 
 .logo {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
 }
 
 .badge {
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: 2px 8px;
     border-radius: var(--radius-sm);
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
 }
 
 .badge.live {
     background: var(--danger);
-    color: white;
+    color: var(--text-inverse);
     animation: pulse 2s infinite;
 }
 
@@ -139,8 +181,10 @@ body {
 }
 
 .team {
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .team.home { color: var(--home-color); }
@@ -151,6 +195,7 @@ body {
     font-weight: 700;
     font-family: var(--font-mono);
     color: var(--text-primary);
+    letter-spacing: -0.02em;
 }
 
 .header-right {
@@ -160,71 +205,77 @@ body {
 }
 
 .period {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .time {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
     font-family: var(--font-mono);
     color: var(--text-primary);
+    background: var(--bg-primary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
 }
 
-/* Main Content */
+/* ==================== Main Content Grid ==================== */
 .main-content {
     display: grid;
-    grid-template-columns: 320px 1fr 320px;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg) var(--spacing-xl);
+    grid-template-columns: 280px 1fr 280px;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     flex: 1;
 }
 
-/* Panel Base */
+/* ==================== Panel - Sigma Card Style ==================== */
 .panel {
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .panel-header {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     border-bottom: 1px solid var(--border-light);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: var(--bg-secondary);
 }
 
 .panel-header h2 {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: var(--text-primary);
+    margin: 0;
 }
 
 .panel-header h3 {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-sm);
+    margin: var(--spacing-md) 0 var(--spacing-sm);
 }
 
 .update-time {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--text-tertiary);
 }
 
-/* Betting Panel */
+/* ==================== Betting Panel ==================== */
 .betting-panel {
     display: flex;
     flex-direction: column;
 }
 
 .signal-display {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     text-align: center;
 }
 
@@ -232,31 +283,28 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-md) var(--spacing-xl);
-    border-radius: var(--radius-lg);
-    background: var(--bg-tertiary);
-    margin-bottom: var(--spacing-md);
-    transition: all 0.3s ease;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    margin-bottom: var(--spacing-sm);
+    transition: all var(--transition-normal);
+    border: 1px solid var(--border-color);
 }
 
-.signal-indicator.strong-home {
-    background: var(--home-light);
-}
-
+.signal-indicator.strong-home,
 .signal-indicator.lean-home {
     background: var(--home-light);
+    border-color: var(--home-color);
 }
 
-.signal-indicator.strong-away {
-    background: var(--away-light);
-}
-
+.signal-indicator.strong-away,
 .signal-indicator.lean-away {
     background: var(--away-light);
+    border-color: var(--away-color);
 }
 
 .signal-text {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.02em;
 }
@@ -272,54 +320,63 @@ body {
 }
 
 .confidence-bar {
-    height: 8px;
-    background: var(--bg-tertiary);
-    border-radius: 4px;
+    height: 6px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
     position: relative;
     overflow: hidden;
+    border: 1px solid var(--border-color);
 }
 
 .confidence-fill {
     height: 100%;
-    background: var(--info);
-    border-radius: 4px;
+    background: var(--sigma-blue);
+    border-radius: var(--radius-sm);
     transition: width 0.5s ease;
 }
 
 .confidence-value {
     position: absolute;
     right: 0;
-    top: -20px;
-    font-size: 0.75rem;
-    font-weight: 500;
+    top: -18px;
+    font-size: 0.6875rem;
+    font-weight: 600;
     color: var(--text-secondary);
 }
 
 .signal-reasons {
-    padding: 0 var(--spacing-lg) var(--spacing-lg);
+    padding: 0 var(--spacing-md) var(--spacing-md);
 }
 
 .reason-item {
     display: flex;
     align-items: flex-start;
     gap: var(--spacing-sm);
-    padding: var(--spacing-sm) 0;
-    font-size: 0.8125rem;
+    padding: var(--spacing-xs) 0;
+    font-size: 0.75rem;
     color: var(--text-secondary);
+    line-height: 1.4;
 }
 
 .reason-item::before {
-    content: "→";
-    color: var(--text-tertiary);
+    content: "";
+    width: 4px;
+    height: 4px;
+    background: var(--sigma-blue);
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
 }
 
+/* ==================== Momentum Section ==================== */
 .momentum-section {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     border-top: 1px solid var(--border-light);
 }
 
 .momentum-section h3 {
     margin-top: 0;
+    margin-bottom: var(--spacing-sm);
 }
 
 .momentum-bar {
@@ -329,38 +386,45 @@ body {
 }
 
 .momentum-label {
-    font-size: 0.6875rem;
-    font-weight: 500;
+    font-size: 0.625rem;
+    font-weight: 600;
     text-transform: uppercase;
-    width: 40px;
+    width: 36px;
+    letter-spacing: 0.02em;
 }
 
-.momentum-label.home { color: var(--home-color); text-align: right; }
-.momentum-label.away { color: var(--away-color); }
+.momentum-label.home {
+    color: var(--home-color);
+    text-align: right;
+}
+.momentum-label.away {
+    color: var(--away-color);
+}
 
 .momentum-track {
     flex: 1;
-    height: 8px;
-    background: linear-gradient(to right, var(--home-light), var(--bg-tertiary), var(--away-light));
-    border-radius: 4px;
+    height: 6px;
+    background: linear-gradient(to right, var(--home-light), var(--bg-primary), var(--away-light));
+    border-radius: var(--radius-sm);
     position: relative;
+    border: 1px solid var(--border-color);
 }
 
 .momentum-fill {
     position: absolute;
     height: 100%;
     background: var(--home-color);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     left: 0;
     transition: width 0.5s ease;
 }
 
 .momentum-marker {
     position: absolute;
-    width: 12px;
-    height: 12px;
-    background: var(--text-primary);
-    border: 2px solid white;
+    width: 10px;
+    height: 10px;
+    background: var(--sigma-charcoal);
+    border: 2px solid var(--bg-secondary);
     border-radius: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -374,16 +438,16 @@ body {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-xs);
-    margin-top: var(--spacing-md);
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    margin-top: var(--spacing-sm);
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
 }
 
 .trend-icon {
-    font-size: 1rem;
+    font-size: 0.875rem;
 }
 
-/* Rink Panel */
+/* ==================== Rink Panel ==================== */
 .rink-panel {
     display: flex;
     flex-direction: column;
@@ -391,75 +455,110 @@ body {
 
 .view-toggle {
     display: flex;
-    gap: var(--spacing-xs);
+    gap: 2px;
+    background: var(--bg-primary);
+    padding: 2px;
+    border-radius: var(--radius-sm);
 }
 
 .toggle-btn {
     padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    background: var(--bg-primary);
+    border: none;
+    background: transparent;
     border-radius: var(--radius-sm);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
 }
 
 .toggle-btn:hover {
     background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .toggle-btn.active {
-    background: var(--text-primary);
-    color: white;
-    border-color: var(--text-primary);
-}
-
-.rink-container {
-    padding: var(--spacing-lg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-#rink-canvas {
-    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     box-shadow: var(--shadow-sm);
 }
 
-.rink-legend {
+.rink-container {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg-primary);
+}
+
+#rink-canvas {
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.rink-legend, .shot-legend {
     display: flex;
     gap: var(--spacing-lg);
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
 }
 
 .legend-item {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--text-secondary);
 }
 
 .legend-color {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
 }
 
 .legend-color.home { background: var(--home-color); }
 .legend-color.away { background: var(--away-color); }
-.legend-color.puck { background: var(--text-primary); }
+.legend-color.puck { background: var(--sigma-charcoal); }
+.legend-color.goalie {
+    background: linear-gradient(135deg, var(--home-color) 50%, var(--away-color) 50%);
+    border: 2px solid var(--bg-secondary);
+    box-shadow: 0 0 0 1px var(--sigma-charcoal);
+}
 
-/* Stats Panel */
+/* ==================== Shot Legend ==================== */
+.shot-marker {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.shot-marker.goal {
+    background: var(--success);
+}
+
+.shot-marker.save {
+    background: var(--sigma-blue);
+}
+
+.shot-marker.miss {
+    background: var(--text-tertiary);
+    border: 1px dashed var(--text-secondary);
+}
+
+.shot-marker.block {
+    background: var(--warning);
+}
+
+/* ==================== Stats Panel ==================== */
 .stats-panel {
     display: flex;
     flex-direction: column;
 }
 
 .xg-display {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -471,35 +570,40 @@ body {
 
 .xg-value {
     display: block;
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
     font-family: var(--font-mono);
     color: var(--text-primary);
+    letter-spacing: -0.02em;
 }
 
 .xg-label {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .xg-comparison {
     flex: 1;
-    padding: 0 var(--spacing-md);
+    padding: 0 var(--spacing-sm);
 }
 
+/* ==================== Zone Stats ==================== */
 .zone-stats {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     border-top: 1px solid var(--border-light);
 }
 
 .zone-stats h3 {
     margin-top: 0;
+    margin-bottom: var(--spacing-sm);
 }
 
 .zone-bars {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
 }
 
 .zone-row {
@@ -509,18 +613,19 @@ body {
 }
 
 .zone-label {
-    width: 70px;
-    font-size: 0.75rem;
+    width: 64px;
+    font-size: 0.6875rem;
     color: var(--text-secondary);
 }
 
 .zone-bar-container {
     flex: 1;
-    height: 8px;
-    background: var(--bg-tertiary);
-    border-radius: 4px;
+    height: 6px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
     display: flex;
     overflow: hidden;
+    border: 1px solid var(--border-color);
 }
 
 .zone-bar {
@@ -531,23 +636,42 @@ body {
 .zone-bar.home { background: var(--home-color); }
 .zone-bar.away { background: var(--away-color); }
 
-/* Bottom Section */
-.bottom-section {
-    display: grid;
-    grid-template-columns: 1fr 280px 1fr;
-    gap: var(--spacing-lg);
-    padding: 0 var(--spacing-xl) var(--spacing-lg);
+/* ==================== xG Timeline Section ==================== */
+.xg-timeline-section {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-top: 1px solid var(--border-light);
 }
 
-/* Insights Panel */
+.xg-timeline-section h3 {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+}
+
+#xg-timeline-chart {
+    height: 80px;
+}
+
+/* ==================== Bottom Section ==================== */
+.bottom-section {
+    display: grid;
+    grid-template-columns: 1fr 240px 1fr;
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-lg) var(--spacing-md);
+}
+
+/* ==================== Insights Panel ==================== */
 .insights-panel {
-    max-height: 200px;
+    max-height: 180px;
     overflow: hidden;
 }
 
 .insights-feed {
-    padding: var(--spacing-md) var(--spacing-lg);
-    max-height: 150px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    max-height: 140px;
     overflow-y: auto;
 }
 
@@ -555,8 +679,8 @@ body {
     display: flex;
     align-items: flex-start;
     gap: var(--spacing-sm);
-    padding: var(--spacing-sm) 0;
-    font-size: 0.8125rem;
+    padding: var(--spacing-xs) 0;
+    font-size: 0.75rem;
     border-bottom: 1px solid var(--border-light);
     animation: slideIn 0.3s ease;
 }
@@ -564,7 +688,7 @@ body {
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-8px);
     }
     to {
         opacity: 1;
@@ -577,126 +701,76 @@ body {
 }
 
 .insight-icon {
-    font-size: 1rem;
+    font-size: 0.875rem;
 }
 
 .insight-text {
     color: var(--text-secondary);
+    flex: 1;
 }
 
 .insight-time {
     margin-left: auto;
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     color: var(--text-tertiary);
+    font-family: var(--font-mono);
 }
 
-/* Position Panel */
+/* ==================== Position Panel ==================== */
 .position-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .position-card {
     text-align: center;
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-    background: var(--bg-secondary);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
 }
 
-.position-card.optimal { border-left: 3px solid var(--success); }
-.position-card.good { border-left: 3px solid var(--info); }
-.position-card.suboptimal { border-left: 3px solid var(--warning); }
-.position-card.critical { border-left: 3px solid var(--danger); }
+.position-card.optimal {
+    border-left: 3px solid var(--success);
+    background: var(--success-light);
+}
+.position-card.good {
+    border-left: 3px solid var(--sigma-blue);
+    background: var(--info-light);
+}
+.position-card.suboptimal {
+    border-left: 3px solid var(--warning);
+    background: var(--warning-light);
+}
+.position-card.critical {
+    border-left: 3px solid var(--danger);
+    background: var(--danger-light);
+}
 
 .position-count {
     display: block;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     font-family: var(--font-mono);
     color: var(--text-primary);
 }
 
 .position-label {
-    font-size: 0.6875rem;
+    font-size: 0.5625rem;
     color: var(--text-tertiary);
     text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-/* Danger Panel */
+/* ==================== Danger Panel ==================== */
 .danger-panel {
-    padding-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
 }
 
 #chances-chart {
-    padding: var(--spacing-md);
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--text-tertiary);
-}
-
-/* Responsive */
-@media (max-width: 1400px) {
-    .main-content {
-        grid-template-columns: 280px 1fr 280px;
-    }
-}
-
-@media (max-width: 1200px) {
-    .main-content {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .rink-panel {
-        grid-column: span 2;
-    }
-
-    .bottom-section {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .positions-panel {
-        grid-column: span 2;
-    }
-}
-
-@media (max-width: 768px) {
-    .main-content {
-        grid-template-columns: 1fr;
-    }
-
-    .rink-panel {
-        grid-column: span 1;
-    }
-
-    .bottom-section {
-        grid-template-columns: 1fr;
-    }
-
-    .positions-panel {
-        grid-column: span 1;
-    }
-
-    .header {
-        flex-direction: column;
-        gap: var(--spacing-md);
-    }
+    padding: var(--spacing-sm);
 }
 
 /* ==================== Power Play Indicator ==================== */
@@ -711,112 +785,56 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--warning);
+    padding: 2px var(--spacing-sm);
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
     border-radius: var(--radius-sm);
     animation: ppPulse 1.5s ease-in-out infinite;
 }
 
 .power-play-indicator.home-advantage {
     background: var(--home-light);
-    border: 1px solid var(--home-color);
+    border-color: var(--home-color);
 }
 
 .power-play-indicator.away-advantage {
     background: var(--away-light);
-    border: 1px solid var(--away-color);
+    border-color: var(--away-color);
 }
 
 @keyframes ppPulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
+    50% { opacity: 0.85; }
 }
 
 .pp-badge {
-    font-size: 0.625rem;
+    font-size: 0.5625rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     color: var(--text-primary);
 }
 
 .pp-type {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     font-family: var(--font-mono);
     color: var(--text-primary);
 }
 
 .pp-time {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     font-family: var(--font-mono);
     color: var(--text-secondary);
-}
-
-/* ==================== Shot Map Legend ==================== */
-.shot-legend {
-    display: flex;
-    gap: var(--spacing-lg);
-    margin-top: var(--spacing-md);
-}
-
-.shot-marker {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.shot-marker.goal {
-    background: var(--success);
-    box-shadow: 0 0 4px var(--success);
-}
-
-.shot-marker.save {
-    background: var(--info);
-}
-
-.shot-marker.miss {
-    background: var(--text-tertiary);
-    border: 1px dashed var(--text-secondary);
-}
-
-.shot-marker.block {
-    background: var(--warning);
-}
-
-.legend-color.goalie {
-    background: linear-gradient(135deg, var(--home-color) 50%, var(--away-color) 50%);
-    border: 2px solid white;
-    box-shadow: 0 0 0 1px var(--text-primary);
-}
-
-/* ==================== xG Timeline Section ==================== */
-.xg-timeline-section {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-top: 1px solid var(--border-light);
-}
-
-.xg-timeline-section h3 {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: var(--spacing-sm);
-}
-
-#xg-timeline-chart {
-    height: 100px;
 }
 
 /* ==================== Goalie Section ==================== */
 .goalie-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-    padding: 0 var(--spacing-xl) var(--spacing-lg);
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-lg) var(--spacing-md);
 }
 
 .goalie-panel {
@@ -826,14 +844,15 @@ body {
 .goalie-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .goalie-card {
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-    background: var(--bg-secondary);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
 }
 
 .goalie-card.home {
@@ -848,34 +867,35 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
 .goalie-team {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .goalie-quality {
-    font-size: 0.625rem;
+    font-size: 0.5625rem;
     font-weight: 600;
     text-transform: uppercase;
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: 2px 6px;
     border-radius: var(--radius-sm);
     background: var(--success);
-    color: white;
+    color: var(--text-inverse);
+    letter-spacing: 0.02em;
 }
 
 .goalie-quality.optimal { background: var(--success); }
-.goalie-quality.good { background: var(--info); }
+.goalie-quality.good { background: var(--sigma-blue); }
 .goalie-quality.vulnerable { background: var(--warning); color: var(--text-primary); }
 .goalie-quality.out_of_position { background: var(--danger); }
 
 .goalie-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
 .goalie-stat {
@@ -884,16 +904,17 @@ body {
 
 .goalie-stat .stat-value {
     display: block;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 700;
     font-family: var(--font-mono);
     color: var(--text-primary);
 }
 
 .goalie-stat .stat-label {
-    font-size: 0.625rem;
+    font-size: 0.5625rem;
     color: var(--text-tertiary);
     text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 /* ==================== Shot Stats Panel ==================== */
@@ -902,17 +923,17 @@ body {
 }
 
 .shot-stats-grid {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 0;
 }
 
 .shot-stat-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-sm) 0;
+    padding: var(--spacing-xs) 0;
     border-bottom: 1px solid var(--border-light);
 }
 
@@ -921,16 +942,16 @@ body {
 }
 
 .shot-stat-label {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     flex: 1;
 }
 
 .shot-stat-value {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 700;
     font-family: var(--font-mono);
-    width: 50px;
+    width: 44px;
     text-align: center;
 }
 
@@ -944,18 +965,92 @@ body {
 
 .shot-stat-divider {
     color: var(--text-tertiary);
-    margin: 0 var(--spacing-sm);
+    margin: 0 var(--spacing-xs);
 }
 
-/* ==================== Responsive - Goalie Section ==================== */
+/* ==================== Scrollbar - Sigma Minimal ==================== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
+
+/* ==================== Responsive Design ==================== */
+@media (max-width: 1400px) {
+    .main-content {
+        grid-template-columns: 260px 1fr 260px;
+    }
+}
+
 @media (max-width: 1200px) {
-    .goalie-section {
-        grid-template-columns: 1fr;
+    .main-content {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rink-panel {
+        grid-column: span 2;
+    }
+
+    .bottom-section {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .positions-panel {
+        grid-column: span 2;
     }
 }
 
 @media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-sm);
+    }
+
+    .rink-panel {
+        grid-column: span 1;
+    }
+
+    .bottom-section {
+        grid-template-columns: 1fr;
+        padding: 0 var(--spacing-sm) var(--spacing-sm);
+    }
+
+    .positions-panel {
+        grid-column: span 1;
+    }
+
+    .goalie-section {
+        grid-template-columns: 1fr;
+        padding: 0 var(--spacing-sm) var(--spacing-sm);
+    }
+
     .goalie-grid {
         grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+    }
+
+    .matchup {
+        gap: var(--spacing-md);
+    }
+
+    .score {
+        font-size: 1.25rem;
     }
 }
