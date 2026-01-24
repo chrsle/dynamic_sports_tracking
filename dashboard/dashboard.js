@@ -92,7 +92,7 @@ class HockeyDashboard {
     initCharts() {
         // Sigma-style chart theme
         const sigmaChartTheme = {
-            fontFamily: 'Inter, Raleway, -apple-system, sans-serif',
+            fontFamily: 'Raleway, Inter, -apple-system, sans-serif',
             foreColor: this.colors.gray600
         };
 
@@ -554,7 +554,7 @@ class HockeyDashboard {
             // Goal indicator (special)
             if (shot.result === 'goal') {
                 ctx.fillStyle = this.colors.white;
-                ctx.font = 'bold 10px Inter, Raleway, sans-serif';
+                ctx.font = 'bold 10px Raleway, Inter, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('G', x, y);

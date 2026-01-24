@@ -599,7 +599,7 @@ def create_xg_timeline_figure():
         ),
         plot_bgcolor=COLORS['card'],
         paper_bgcolor=COLORS['card'],
-        font=dict(color=COLORS['text'], family='Inter, Raleway, sans-serif', size=11),
+        font=dict(color=COLORS['text'], family='Raleway, Inter, sans-serif', size=11),
         margin=dict(l=40, r=20, t=20, b=40),
         height=180,
         legend=dict(
@@ -699,7 +699,7 @@ def create_fatigue_figure():
         ),
         plot_bgcolor=COLORS['card'],
         paper_bgcolor=COLORS['card'],
-        font=dict(color=COLORS['text'], size=10, family='Inter, Raleway, sans-serif'),
+        font=dict(color=COLORS['text'], size=10, family='Raleway, Inter, sans-serif'),
         margin=dict(l=40, r=10, t=10, b=50),
         height=180
     )
@@ -780,7 +780,7 @@ app.index_string = '''
     <title>Soccer Analytics Dashboard</title>
     {%favicon%}
     {%css%}
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Sigma Computing Design System */
         :root {
@@ -798,7 +798,7 @@ app.index_string = '''
 
         body {
             background-color: #f5f5f5 !important;
-            font-family: 'Inter', 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            font-family: 'Raleway', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
             color: #292929 !important;
             font-size: 14px;
         }
