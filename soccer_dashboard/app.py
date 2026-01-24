@@ -31,23 +31,43 @@ GOAL_WIDTH = 7.32
 CENTER_CIRCLE_RADIUS = 9.15
 PENALTY_SPOT = 11.0
 
+# Sigma Computing Color Palette
 COLORS = {
-    'home': '#3b82f6',
-    'home_light': '#60a5fa',
-    'away': '#ef4444',
-    'away_light': '#f87171',
-    'pitch': '#1a472a',
-    'lines': 'rgba(255, 255, 255, 0.8)',
+    # Team colors (Sigma categorical)
+    'home': '#1976D2',
+    'home_light': 'rgba(25, 118, 210, 0.15)',
+    'away': '#EF5350',
+    'away_light': 'rgba(239, 83, 80, 0.15)',
+
+    # Pitch (keeping green for visibility)
+    'pitch': '#2d5a3c',
+    'lines': 'rgba(255, 255, 255, 0.9)',
     'ball': '#ffffff',
-    'goal': '#10b981',
-    'saved': '#f59e0b',
-    'blocked': '#6b7280',
-    'off_target': '#374151',
-    'bg': '#0a0f1a',
-    'card': '#1a2235',
-    'border': '#374151',
-    'text': '#f9fafb',
-    'text_secondary': '#9ca3af',
+
+    # Status colors (Sigma)
+    'goal': '#2A8D5C',
+    'saved': '#F6BD16',
+    'blocked': '#9fa8a7',
+    'off_target': '#757575',
+
+    # Surface colors (Sigma light theme)
+    'bg': '#f5f5f5',
+    'card': '#ffffff',
+    'border': '#e0e0e0',
+    'border_light': '#f0f0f0',
+
+    # Text (Sigma)
+    'text': '#292929',
+    'text_secondary': '#575757',
+    'text_tertiary': '#9fa8a7',
+
+    # Additional Sigma categorical
+    'cyan': '#52CBFF',
+    'purple': '#6E4BD2',
+    'orange': '#FB9649',
+    'lime': '#87DC44',
+    'teal': '#68DFC5',
+    'yellow': '#F6BD16',
 }
 
 
@@ -435,16 +455,16 @@ def create_pitch_figure(view_mode='positions'):
         _add_heatmap_to_figure(fig)
         _add_players_to_figure(fig)
 
-    # Layout
+    # Layout - Sigma Computing style
     fig.update_layout(
         xaxis=dict(range=[-5, PITCH_LENGTH + 5], showgrid=False, zeroline=False,
                    showticklabels=False, fixedrange=True),
         yaxis=dict(range=[-5, PITCH_WIDTH + 5], showgrid=False, zeroline=False,
                    showticklabels=False, scaleanchor='x', scaleratio=1, fixedrange=True),
-        plot_bgcolor=COLORS['bg'],
-        paper_bgcolor=COLORS['bg'],
+        plot_bgcolor=COLORS['card'],
+        paper_bgcolor=COLORS['card'],
         margin=dict(l=10, r=10, t=10, b=10),
-        height=400,
+        height=380,
         showlegend=False
     )
 
@@ -542,7 +562,7 @@ def _add_heatmap_to_figure(fig):
 # ============================================================================
 
 def create_xg_timeline_figure():
-    """Create xG timeline chart"""
+    """Create xG timeline chart - Sigma Computing style"""
     fig = go.Figure()
 
     if game_state.xg_timeline:
@@ -553,31 +573,50 @@ def create_xg_timeline_figure():
         fig.add_trace(go.Scatter(
             x=times, y=home_xg, mode='lines', name='Home xG',
             line=dict(color=COLORS['home'], width=2),
-            fill='tozeroy', fillcolor=f"rgba(59, 130, 246, 0.2)"
+            fill='tozeroy', fillcolor='rgba(25, 118, 210, 0.1)'
         ))
 
         fig.add_trace(go.Scatter(
             x=times, y=away_xg, mode='lines', name='Away xG',
             line=dict(color=COLORS['away'], width=2),
-            fill='tozeroy', fillcolor=f"rgba(239, 68, 68, 0.2)"
+            fill='tozeroy', fillcolor='rgba(239, 83, 80, 0.1)'
         ))
 
     fig.update_layout(
-        xaxis=dict(title='Match Time (s)', color=COLORS['text_secondary'], gridcolor=COLORS['border']),
-        yaxis=dict(title='Cumulative xG', color=COLORS['text_secondary'], gridcolor=COLORS['border']),
+        xaxis=dict(
+            title='Match Time (s)',
+            color=COLORS['text_secondary'],
+            gridcolor=COLORS['border_light'],
+            linecolor=COLORS['border'],
+            tickfont=dict(size=10)
+        ),
+        yaxis=dict(
+            title='Cumulative xG',
+            color=COLORS['text_secondary'],
+            gridcolor=COLORS['border_light'],
+            linecolor=COLORS['border'],
+            tickfont=dict(size=10)
+        ),
         plot_bgcolor=COLORS['card'],
         paper_bgcolor=COLORS['card'],
-        font=dict(color=COLORS['text']),
+        font=dict(color=COLORS['text'], family='Inter, Raleway, sans-serif', size=11),
         margin=dict(l=40, r=20, t=20, b=40),
-        height=200,
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+        height=180,
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1,
+            font=dict(size=10)
+        )
     )
 
     return fig
 
 
 def create_possession_figure():
-    """Create possession bar chart"""
+    """Create possession bar chart - Sigma Computing style"""
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
@@ -587,7 +626,8 @@ def create_possession_figure():
         marker_color=COLORS['home'],
         name='Home',
         text=f"{game_state.possession['home']:.0f}%",
-        textposition='inside'
+        textposition='inside',
+        textfont=dict(color='white', size=11, family='Inter, sans-serif')
     ))
 
     fig.add_trace(go.Bar(
@@ -597,17 +637,18 @@ def create_possession_figure():
         marker_color=COLORS['away'],
         name='Away',
         text=f"{game_state.possession['away']:.0f}%",
-        textposition='inside'
+        textposition='inside',
+        textfont=dict(color='white', size=11, family='Inter, sans-serif')
     ))
 
     fig.update_layout(
         barmode='stack',
-        xaxis=dict(showticklabels=False, showgrid=False, range=[0, 100]),
+        xaxis=dict(showticklabels=False, showgrid=False, range=[0, 100], zeroline=False),
         yaxis=dict(showticklabels=False),
         plot_bgcolor=COLORS['card'],
         paper_bgcolor=COLORS['card'],
         margin=dict(l=10, r=10, t=10, b=10),
-        height=50,
+        height=40,
         showlegend=False
     )
 
@@ -615,19 +656,20 @@ def create_possession_figure():
 
 
 def create_fatigue_figure():
-    """Create fatigue heatmap for all players"""
+    """Create fatigue heatmap for all players - Sigma Computing style"""
     players = game_state.home_players + game_state.away_players
     fatigue_values = [game_state.fatigue.get(p.player_id, 0) for p in players]
     labels = [f"{'H' if p.team == 'home' else 'A'}{p.jersey_number}" for p in players]
 
+    # Sigma categorical colors for fatigue levels
     colors = []
     for f in fatigue_values:
         if f > 0.7:
-            colors.append('#ef4444')
+            colors.append(COLORS['away'])  # Red for high fatigue
         elif f > 0.4:
-            colors.append('#f59e0b')
+            colors.append(COLORS['yellow'])  # Yellow for medium
         else:
-            colors.append('#10b981')
+            colors.append(COLORS['goal'])  # Green for low
 
     fig = go.Figure()
 
@@ -636,38 +678,52 @@ def create_fatigue_figure():
         y=fatigue_values,
         marker_color=colors,
         text=[f"{f*100:.0f}%" for f in fatigue_values],
-        textposition='outside'
+        textposition='outside',
+        textfont=dict(size=9)
     ))
 
     fig.update_layout(
-        xaxis=dict(color=COLORS['text_secondary'], tickangle=45),
-        yaxis=dict(range=[0, 1.1], title='Fatigue Level', color=COLORS['text_secondary']),
+        xaxis=dict(
+            color=COLORS['text_secondary'],
+            tickangle=45,
+            tickfont=dict(size=9),
+            gridcolor=COLORS['border_light']
+        ),
+        yaxis=dict(
+            range=[0, 1.1],
+            title='Fatigue',
+            color=COLORS['text_secondary'],
+            tickfont=dict(size=9),
+            gridcolor=COLORS['border_light'],
+            titlefont=dict(size=10)
+        ),
         plot_bgcolor=COLORS['card'],
         paper_bgcolor=COLORS['card'],
-        font=dict(color=COLORS['text'], size=10),
-        margin=dict(l=40, r=10, t=10, b=60),
-        height=200
+        font=dict(color=COLORS['text'], size=10, family='Inter, Raleway, sans-serif'),
+        margin=dict(l=40, r=10, t=10, b=50),
+        height=180
     )
 
     return fig
 
 
 def create_goalie_figure(team='home'):
-    """Create goalkeeper positioning visualization"""
+    """Create goalkeeper positioning visualization - Sigma Computing style"""
     goalie = game_state.home_goalie if team == 'home' else game_state.away_goalie
 
     fig = go.Figure()
 
-    # Goal outline
+    # Goal outline (Sigma minimal style)
     fig.add_shape(type='rect', x0=0, y0=0, x1=100, y1=50,
-                  line=dict(color='white', width=2))
+                  line=dict(color=COLORS['text'], width=2))
 
     # Coverage area
     coverage_width = goalie['coverage']
+    coverage_color = COLORS['home_light'] if team == 'home' else COLORS['away_light']
     fig.add_shape(type='rect',
                   x0=(100 - coverage_width) / 2, y0=0,
                   x1=(100 + coverage_width) / 2, y1=50,
-                  fillcolor=f"rgba(59, 130, 246, 0.3)" if team == 'home' else "rgba(239, 68, 68, 0.3)",
+                  fillcolor=coverage_color,
                   line=dict(width=0))
 
     # Goalkeeper position
@@ -676,26 +732,34 @@ def create_goalie_figure(team='home'):
 
     fig.add_trace(go.Scatter(
         x=[gk_x], y=[gk_y], mode='markers',
-        marker=dict(color=COLORS['home'] if team == 'home' else COLORS['away'],
-                   size=20, line=dict(color='white', width=2)),
+        marker=dict(
+            color=COLORS['home'] if team == 'home' else COLORS['away'],
+            size=18,
+            line=dict(color=COLORS['card'], width=2)
+        ),
         showlegend=False
     ))
 
-    # Quality indicator
-    quality_color = '#10b981' if goalie['positioning'] > 0.7 else '#f59e0b' if goalie['positioning'] > 0.4 else '#ef4444'
+    # Quality indicator (Sigma colors)
+    if goalie['positioning'] > 0.7:
+        quality_color = COLORS['goal']
+    elif goalie['positioning'] > 0.4:
+        quality_color = COLORS['yellow']
+    else:
+        quality_color = COLORS['away']
 
     fig.add_annotation(
         x=50, y=55, text=f"Quality: {goalie['positioning']*100:.0f}%",
-        showarrow=False, font=dict(color=quality_color, size=12)
+        showarrow=False, font=dict(color=quality_color, size=11, family='Inter, sans-serif')
     )
 
     fig.update_layout(
-        xaxis=dict(range=[-10, 110], showgrid=False, showticklabels=False, fixedrange=True),
-        yaxis=dict(range=[-5, 60], showgrid=False, showticklabels=False, fixedrange=True),
+        xaxis=dict(range=[-10, 110], showgrid=False, showticklabels=False, fixedrange=True, zeroline=False),
+        yaxis=dict(range=[-5, 60], showgrid=False, showticklabels=False, fixedrange=True, zeroline=False),
         plot_bgcolor=COLORS['bg'],
         paper_bgcolor=COLORS['card'],
         margin=dict(l=10, r=10, t=10, b=10),
-        height=120
+        height=110
     )
 
     return fig
@@ -705,9 +769,9 @@ def create_goalie_figure(team='home'):
 # DASH APP
 # ============================================================================
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])
 
-# Custom CSS
+# Sigma Computing Design System CSS
 app.index_string = '''
 <!DOCTYPE html>
 <html>
@@ -716,22 +780,159 @@ app.index_string = '''
     <title>Soccer Analytics Dashboard</title>
     {%favicon%}
     {%css%}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0a0f1a; }
-        .card { background-color: #1a2235; border: 1px solid #374151; border-radius: 8px; margin-bottom: 15px; }
-        .card-header { background-color: #111827; border-bottom: 1px solid #374151; padding: 10px 15px; font-weight: 600; }
-        .card-body { padding: 15px; }
-        .stat-label { color: #9ca3af; font-size: 0.85rem; }
-        .stat-value { color: #f9fafb; font-size: 1.1rem; font-weight: 600; }
-        .home-color { color: #3b82f6; }
-        .away-color { color: #ef4444; }
-        .score-display { font-size: 2.5rem; font-weight: 700; }
-        .xg-display { font-size: 1.8rem; font-weight: 600; }
-        .time-display { font-size: 1.5rem; font-family: monospace; color: #10b981; background: #1a2235; padding: 5px 15px; border-radius: 5px; }
-        .insight-item { padding: 8px 12px; margin: 4px 0; background: #111827; border-radius: 4px; font-size: 0.85rem; border-left: 3px solid #374151; }
-        .insight-goal { border-left-color: #10b981; }
-        .insight-shot { border-left-color: #f59e0b; }
-        .btn-control { margin: 2px; }
+        /* Sigma Computing Design System */
+        :root {
+            --sigma-charcoal: #292929;
+            --sigma-gray-600: #575757;
+            --sigma-gray-400: #9fa8a7;
+            --sigma-gray-200: #e0e0e0;
+            --sigma-gray-100: #f0f0f0;
+            --sigma-white: #ffffff;
+            --sigma-blue: #1976D2;
+            --sigma-red: #EF5350;
+            --sigma-green: #2A8D5C;
+            --sigma-yellow: #F6BD16;
+        }
+
+        body {
+            background-color: #f5f5f5 !important;
+            font-family: 'Inter', 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            color: #292929 !important;
+            font-size: 14px;
+        }
+
+        .card {
+            background-color: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+            border-radius: 4px !important;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        .card-header {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+            padding: 8px 16px !important;
+            font-weight: 600 !important;
+            font-size: 0.8125rem !important;
+            color: #292929 !important;
+        }
+
+        .card-body {
+            padding: 12px 16px !important;
+        }
+
+        .stat-label {
+            color: #9fa8a7 !important;
+            font-size: 0.6875rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .stat-value {
+            color: #292929 !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+        }
+
+        .home-color { color: #1976D2 !important; }
+        .away-color { color: #EF5350 !important; }
+
+        .score-display {
+            font-size: 2rem !important;
+            font-weight: 700 !important;
+            font-family: 'SF Mono', Monaco, monospace !important;
+        }
+
+        .xg-display {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            font-family: 'SF Mono', Monaco, monospace !important;
+        }
+
+        .time-display {
+            font-size: 1.125rem !important;
+            font-family: 'SF Mono', Monaco, monospace !important;
+            color: #2A8D5C !important;
+            background: #f0f0f0 !important;
+            padding: 4px 12px !important;
+            border-radius: 2px !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+
+        .insight-item {
+            padding: 6px 10px;
+            margin: 3px 0;
+            background: #f5f5f5;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            border-left: 3px solid #e0e0e0;
+            color: #575757;
+        }
+
+        .insight-goal { border-left-color: #2A8D5C !important; }
+        .insight-shot { border-left-color: #F6BD16 !important; }
+
+        .btn-control {
+            margin: 2px;
+            border-radius: 2px !important;
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+        }
+
+        .btn-primary {
+            background-color: #1976D2 !important;
+            border-color: #1976D2 !important;
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0 !important;
+            border-color: #e0e0e0 !important;
+            color: #575757 !important;
+        }
+
+        .btn-success {
+            background-color: #2A8D5C !important;
+            border-color: #2A8D5C !important;
+        }
+
+        .btn-warning {
+            background-color: #F6BD16 !important;
+            border-color: #F6BD16 !important;
+            color: #292929 !important;
+        }
+
+        h2, h6, .h2, .h6 {
+            color: #292929 !important;
+        }
+
+        .text-white {
+            color: #292929 !important;
+        }
+
+        .text-secondary {
+            color: #9fa8a7 !important;
+        }
+
+        .form-select, .dropdown-toggle {
+            font-size: 0.75rem !important;
+            border-radius: 2px !important;
+        }
+
+        /* Badge styling */
+        .badge {
+            font-size: 0.6875rem !important;
+            font-weight: 600 !important;
+            border-radius: 2px !important;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f0f0f0; }
+        ::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9fa8a7; }
     </style>
 </head>
 <body>
@@ -750,29 +951,29 @@ app.layout = dbc.Container([
     dcc.Interval(id='interval-component', interval=33, n_intervals=0),
     dcc.Store(id='view-mode', data='positions'),
 
-    # Header
+    # Header - Sigma Computing style
     dbc.Row([
         dbc.Col([
-            html.H2("⚽ Soccer Analytics Dashboard", className="text-white mb-0")
+            html.H2("Soccer Analytics", className="mb-0", style={'fontSize': '1rem', 'fontWeight': '600', 'color': '#292929'})
         ], width=4),
         dbc.Col([
             html.Div([
                 html.Span(id='home-team-name', children="HOME", className="home-color me-3",
-                         style={'fontSize': '1.2rem', 'fontWeight': '600'}),
+                         style={'fontSize': '0.875rem', 'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.02em'}),
                 html.Span(id='home-score', children="0", className="score-display home-color me-2"),
-                html.Span(" - ", className="score-display text-white"),
+                html.Span(" - ", className="score-display", style={'color': '#292929'}),
                 html.Span(id='away-score', children="0", className="score-display away-color ms-2"),
                 html.Span(id='away-team-name', children="AWAY", className="away-color ms-3",
-                         style={'fontSize': '1.2rem', 'fontWeight': '600'}),
+                         style={'fontSize': '0.875rem', 'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.02em'}),
             ], className="text-center")
         ], width=4),
         dbc.Col([
             html.Div([
                 html.Span(id='match-time', children="00:00", className="time-display me-3"),
-                html.Span(id='frame-counter', children="Frame: 0", className="text-secondary")
+                html.Span(id='frame-counter', children="Frame: 0", style={'color': '#9fa8a7', 'fontSize': '0.75rem'})
             ], className="text-end")
         ], width=4),
-    ], className="py-3 mb-3", style={'backgroundColor': '#111827', 'borderRadius': '8px'}),
+    ], className="py-2 mb-3", style={'backgroundColor': '#ffffff', 'borderRadius': '4px', 'border': '1px solid #e0e0e0', 'boxShadow': '0 1px 2px rgba(0,0,0,0.04)'}),
 
     # Playback Controls
     dbc.Row([
@@ -1014,7 +1215,7 @@ app.layout = dbc.Container([
         ], width=12),
     ], className="mt-3"),
 
-], fluid=True, style={'backgroundColor': '#0a0f1a', 'minHeight': '100vh', 'padding': '20px'})
+], fluid=True, style={'backgroundColor': '#f5f5f5', 'minHeight': '100vh', 'padding': '16px'})
 
 
 # ============================================================================

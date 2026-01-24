@@ -1,5 +1,6 @@
 /**
  * Hockey Analytics Dashboard
+ * Sigma Computing Design System
  * Real-time analytics visualization
  */
 
@@ -11,6 +12,47 @@ class HockeyDashboard {
         this.heatmapData = null;
         this.playerPositions = { home: [], away: [] };
         this.puckPosition = null;
+
+        // Sigma Computing Color Palette
+        this.colors = {
+            // Core grays
+            charcoal: '#292929',
+            dark: '#3d3d3d',
+            gray600: '#575757',
+            gray500: '#757575',
+            gray400: '#9fa8a7',
+            gray200: '#e0e0e0',
+            gray100: '#f0f0f0',
+            white: '#ffffff',
+
+            // Categorical colors (data visualization)
+            blue: '#1976D2',
+            yellow: '#F6BD16',
+            red: '#EF5350',
+            cyan: '#52CBFF',
+            green: '#2A8D5C',
+            orange: '#FB9649',
+            purple: '#6E4BD2',
+            lime: '#87DC44',
+            pink: '#F72585',
+            teal: '#68DFC5',
+
+            // Team colors (using Sigma categorical)
+            home: '#1976D2',
+            homeLight: 'rgba(25, 118, 210, 0.15)',
+            away: '#EF5350',
+            awayLight: 'rgba(239, 83, 80, 0.15)',
+
+            // Status colors
+            success: '#2A8D5C',
+            warning: '#F6BD16',
+            danger: '#EF5350',
+            info: '#52CBFF',
+
+            // Surface
+            surface: '#f5f5f5',
+            ice: '#fafafa'
+        };
 
         // New tracking data
         this.shots = [];
@@ -48,13 +90,20 @@ class HockeyDashboard {
     // ==================== Charts ====================
 
     initCharts() {
+        // Sigma-style chart theme
+        const sigmaChartTheme = {
+            fontFamily: 'Inter, Raleway, -apple-system, sans-serif',
+            foreColor: this.colors.gray600
+        };
+
         // xG Comparison Chart
         this.charts.xg = new ApexCharts(document.getElementById('xg-chart'), {
             chart: {
                 type: 'bar',
                 height: 60,
                 sparkline: { enabled: true },
-                toolbar: { show: false }
+                toolbar: { show: false },
+                ...sigmaChartTheme
             },
             series: [{
                 name: 'Home xG',
@@ -67,10 +116,11 @@ class HockeyDashboard {
                 bar: {
                     horizontal: true,
                     barHeight: '70%',
-                    distributed: false
+                    distributed: false,
+                    borderRadius: 2
                 }
             },
-            colors: ['#1a73e8', '#ea4335'],
+            colors: [this.colors.home, this.colors.away],
             grid: { padding: { top: 0, bottom: 0 } },
             xaxis: { categories: ['xG'] },
             tooltip: { enabled: false }
@@ -81,14 +131,15 @@ class HockeyDashboard {
         this.charts.xgTimeline = new ApexCharts(document.getElementById('xg-timeline-chart'), {
             chart: {
                 type: 'area',
-                height: 100,
+                height: 80,
                 sparkline: { enabled: false },
                 toolbar: { show: false },
                 animations: {
                     enabled: true,
                     dynamicAnimation: { speed: 300 }
                 },
-                zoom: { enabled: false }
+                zoom: { enabled: false },
+                ...sigmaChartTheme
             },
             series: [{
                 name: 'Home xG',
@@ -105,17 +156,17 @@ class HockeyDashboard {
                 type: 'gradient',
                 gradient: {
                     shadeIntensity: 1,
-                    opacityFrom: 0.5,
-                    opacityTo: 0.1
+                    opacityFrom: 0.4,
+                    opacityTo: 0.05
                 }
             },
-            colors: ['#1a73e8', '#ea4335'],
+            colors: [this.colors.home, this.colors.away],
             xaxis: {
                 type: 'numeric',
                 labels: {
                     show: true,
                     formatter: (val) => Math.floor(val / 60) + ':' + String(Math.floor(val % 60)).padStart(2, '0'),
-                    style: { fontSize: '10px', colors: '#9aa0a6' }
+                    style: { fontSize: '10px', colors: this.colors.gray400 }
                 },
                 axisBorder: { show: false },
                 axisTicks: { show: false }
@@ -124,12 +175,12 @@ class HockeyDashboard {
                 labels: {
                     show: true,
                     formatter: (val) => val.toFixed(1),
-                    style: { fontSize: '10px', colors: '#9aa0a6' }
+                    style: { fontSize: '10px', colors: this.colors.gray400 }
                 }
             },
             grid: {
                 show: true,
-                borderColor: '#e8eaed',
+                borderColor: this.colors.gray200,
                 strokeDashArray: 3,
                 padding: { left: 10, right: 10 }
             },
@@ -148,13 +199,14 @@ class HockeyDashboard {
         this.charts.chances = new ApexCharts(document.getElementById('chances-chart'), {
             chart: {
                 type: 'area',
-                height: 120,
+                height: 100,
                 sparkline: { enabled: true },
                 toolbar: { show: false },
                 animations: {
                     enabled: true,
                     dynamicAnimation: { speed: 500 }
-                }
+                },
+                ...sigmaChartTheme
             },
             series: [{
                 name: 'Home',
@@ -171,11 +223,11 @@ class HockeyDashboard {
                 type: 'gradient',
                 gradient: {
                     shadeIntensity: 1,
-                    opacityFrom: 0.4,
-                    opacityTo: 0.1
+                    opacityFrom: 0.35,
+                    opacityTo: 0.05
                 }
             },
-            colors: ['#1a73e8', '#ea4335'],
+            colors: [this.colors.home, this.colors.away],
             tooltip: {
                 enabled: true,
                 x: { show: false }
@@ -200,25 +252,25 @@ class HockeyDashboard {
         // Clear canvas
         ctx.clearRect(0, 0, w, h);
 
-        // Ice background
-        ctx.fillStyle = '#f8f9fa';
+        // Ice background (Sigma light surface)
+        ctx.fillStyle = this.colors.ice;
         ctx.fillRect(0, 0, w, h);
 
         // Rink outline
-        ctx.strokeStyle = '#9aa0a6';
+        ctx.strokeStyle = this.colors.gray400;
         ctx.lineWidth = 2;
         ctx.strokeRect(5, 5, w - 10, h - 10);
 
-        // Center line (red)
-        ctx.strokeStyle = '#ea4335';
+        // Center line (using Sigma red)
+        ctx.strokeStyle = this.colors.red;
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(w / 2, 5);
         ctx.lineTo(w / 2, h - 5);
         ctx.stroke();
 
-        // Blue lines
-        ctx.strokeStyle = '#1a73e8';
+        // Blue lines (Sigma blue)
+        ctx.strokeStyle = this.colors.blue;
         ctx.lineWidth = 2;
 
         // Left blue line
@@ -234,7 +286,7 @@ class HockeyDashboard {
         ctx.stroke();
 
         // Goal lines
-        ctx.strokeStyle = '#ea4335';
+        ctx.strokeStyle = this.colors.red;
         ctx.lineWidth = 1;
 
         ctx.beginPath();
@@ -248,13 +300,13 @@ class HockeyDashboard {
         ctx.stroke();
 
         // Center circle
-        ctx.strokeStyle = '#ea4335';
+        ctx.strokeStyle = this.colors.red;
         ctx.beginPath();
         ctx.arc(w / 2, h / 2, 30, 0, Math.PI * 2);
         ctx.stroke();
 
         // Center dot
-        ctx.fillStyle = '#ea4335';
+        ctx.fillStyle = this.colors.red;
         ctx.beginPath();
         ctx.arc(w / 2, h / 2, 4, 0, Math.PI * 2);
         ctx.fill();
@@ -267,21 +319,21 @@ class HockeyDashboard {
             { x: w * 0.81, y: h * 0.73 }
         ];
 
-        ctx.strokeStyle = '#1a73e8';
+        ctx.strokeStyle = this.colors.blue;
         faceoffPositions.forEach(pos => {
             ctx.beginPath();
             ctx.arc(pos.x, pos.y, 20, 0, Math.PI * 2);
             ctx.stroke();
 
-            ctx.fillStyle = '#ea4335';
+            ctx.fillStyle = this.colors.red;
             ctx.beginPath();
             ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
             ctx.fill();
         });
 
         // Goal creases
-        ctx.fillStyle = 'rgba(26, 115, 232, 0.1)';
-        ctx.strokeStyle = '#1a73e8';
+        ctx.fillStyle = this.colors.homeLight;
+        ctx.strokeStyle = this.colors.blue;
 
         // Left crease
         ctx.beginPath();
@@ -306,7 +358,7 @@ class HockeyDashboard {
         // Draw base rink first
         this.drawRink();
 
-        // Draw heatmap overlay
+        // Draw heatmap overlay (using Sigma orange for heat)
         const gridW = data[0].length;
         const gridH = data.length;
         const cellW = w / gridW;
@@ -317,7 +369,7 @@ class HockeyDashboard {
                 const value = data[y][x];
                 if (value > 0.1) {
                     const alpha = Math.min(value * 0.6, 0.7);
-                    ctx.fillStyle = `rgba(234, 67, 53, ${alpha})`;
+                    ctx.fillStyle = `rgba(251, 150, 73, ${alpha})`; // Sigma orange
                     ctx.fillRect(x * cellW, y * cellH, cellW, cellH);
                 }
             }
@@ -332,8 +384,8 @@ class HockeyDashboard {
         // Draw base rink
         this.drawRink();
 
-        // Draw home team players
-        ctx.fillStyle = '#1a73e8';
+        // Draw home team players (Sigma blue)
+        ctx.fillStyle = this.colors.home;
         this.playerPositions.home.forEach(pos => {
             const x = (pos.x / 200 + 0.5) * w;
             const y = (pos.y / 85 + 0.5) * h;
@@ -342,8 +394,8 @@ class HockeyDashboard {
             ctx.fill();
         });
 
-        // Draw away team players
-        ctx.fillStyle = '#ea4335';
+        // Draw away team players (Sigma red)
+        ctx.fillStyle = this.colors.away;
         this.playerPositions.away.forEach(pos => {
             const x = (pos.x / 200 + 0.5) * w;
             const y = (pos.y / 85 + 0.5) * h;
@@ -357,7 +409,7 @@ class HockeyDashboard {
 
         // Draw puck
         if (this.puckPosition) {
-            ctx.fillStyle = '#1a1a2e';
+            ctx.fillStyle = this.colors.charcoal;
             const px = (this.puckPosition.x / 200 + 0.5) * w;
             const py = (this.puckPosition.y / 85 + 0.5) * h;
             ctx.beginPath();
@@ -374,8 +426,8 @@ class HockeyDashboard {
             const y = (pos.y / 85 + 0.5) * h;
 
             // Goalie marker (star shape)
-            ctx.fillStyle = '#1a73e8';
-            ctx.strokeStyle = '#ffffff';
+            ctx.fillStyle = this.colors.home;
+            ctx.strokeStyle = this.colors.white;
             ctx.lineWidth = 2;
             this.drawStar(ctx, x, y, 5, 12, 6);
             ctx.fill();
@@ -395,8 +447,8 @@ class HockeyDashboard {
             const x = (pos.x / 200 + 0.5) * w;
             const y = (pos.y / 85 + 0.5) * h;
 
-            ctx.fillStyle = '#ea4335';
-            ctx.strokeStyle = '#ffffff';
+            ctx.fillStyle = this.colors.away;
+            ctx.strokeStyle = this.colors.white;
             ctx.lineWidth = 2;
             this.drawStar(ctx, x, y, 5, 12, 6);
             ctx.fill();
@@ -435,11 +487,11 @@ class HockeyDashboard {
 
     getQualityColor(quality) {
         switch (quality) {
-            case 'optimal': return '#34a853';
-            case 'good': return '#4285f4';
-            case 'vulnerable': return '#fbbc04';
-            case 'out_of_position': return '#ea4335';
-            default: return '#9aa0a6';
+            case 'optimal': return this.colors.success;
+            case 'good': return this.colors.blue;
+            case 'vulnerable': return this.colors.warning;
+            case 'out_of_position': return this.colors.danger;
+            default: return this.colors.gray400;
         }
     }
 
@@ -459,32 +511,32 @@ class HockeyDashboard {
             // Size based on xG
             const radius = 4 + shot.xg * 20;
 
-            // Color based on result
+            // Color based on result (Sigma colors)
             let fillColor, strokeColor;
             switch (shot.result) {
                 case 'goal':
-                    fillColor = '#34a853';
-                    strokeColor = '#2d9248';
+                    fillColor = this.colors.success;
+                    strokeColor = '#248550';
                     break;
                 case 'save':
-                    fillColor = '#4285f4';
-                    strokeColor = '#3b78e7';
+                    fillColor = this.colors.blue;
+                    strokeColor = '#1565C0';
                     break;
                 case 'miss':
-                    fillColor = 'rgba(154, 160, 166, 0.5)';
-                    strokeColor = '#9aa0a6';
+                    fillColor = 'rgba(159, 168, 167, 0.5)';
+                    strokeColor = this.colors.gray400;
                     break;
                 case 'block':
-                    fillColor = '#fbbc04';
-                    strokeColor = '#e8ab00';
+                    fillColor = this.colors.warning;
+                    strokeColor = '#D9A514';
                     break;
                 default:
-                    fillColor = '#9aa0a6';
-                    strokeColor = '#5f6368';
+                    fillColor = this.colors.gray400;
+                    strokeColor = this.colors.gray600;
             }
 
             // Team indicator (border)
-            ctx.strokeStyle = shot.team === 'home' ? '#1a73e8' : '#ea4335';
+            ctx.strokeStyle = shot.team === 'home' ? this.colors.home : this.colors.away;
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
@@ -501,8 +553,8 @@ class HockeyDashboard {
 
             // Goal indicator (special)
             if (shot.result === 'goal') {
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 10px Inter';
+                ctx.fillStyle = this.colors.white;
+                ctx.font = 'bold 10px Inter, Raleway, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('G', x, y);
@@ -521,10 +573,10 @@ class HockeyDashboard {
         // Draw base rink
         this.drawRink();
 
-        // Draw hotspot circles
+        // Draw hotspot circles (Sigma colors)
         if (hotspots && hotspots.home) {
-            ctx.fillStyle = 'rgba(26, 115, 232, 0.3)';
-            ctx.strokeStyle = '#1a73e8';
+            ctx.fillStyle = this.colors.homeLight;
+            ctx.strokeStyle = this.colors.home;
             hotspots.home.forEach(hs => {
                 const x = (hs.x / 200 + 0.5) * w;
                 const y = (hs.y / 85 + 0.5) * h;
@@ -537,8 +589,8 @@ class HockeyDashboard {
         }
 
         if (hotspots && hotspots.away) {
-            ctx.fillStyle = 'rgba(234, 67, 53, 0.3)';
-            ctx.strokeStyle = '#ea4335';
+            ctx.fillStyle = this.colors.awayLight;
+            ctx.strokeStyle = this.colors.away;
             hotspots.away.forEach(hs => {
                 const x = (hs.x / 200 + 0.5) * w;
                 const y = (hs.y / 85 + 0.5) * h;
@@ -602,7 +654,7 @@ class HockeyDashboard {
 
             this.websocket.onopen = () => {
                 console.log('Connected to analytics server');
-                document.querySelector('.badge.live').style.background = '#34a853';
+                document.querySelector('.badge.live').style.background = this.colors.success;
             };
 
             this.websocket.onmessage = (event) => {
@@ -612,7 +664,7 @@ class HockeyDashboard {
 
             this.websocket.onclose = () => {
                 console.log('Disconnected from server');
-                document.querySelector('.badge.live').style.background = '#ea4335';
+                document.querySelector('.badge.live').style.background = this.colors.danger;
                 setTimeout(() => this.connectWebSocket(), 5000);
             };
 
@@ -836,22 +888,22 @@ class HockeyDashboard {
         const position = ((momentum.value || 0) + 1) / 2 * 100;
         marker.style.left = position + '%';
 
-        // Update trend
+        // Update trend (using Sigma colors)
         const trendIcon = trend.querySelector('.trend-icon');
         const trendText = trend.querySelector('.trend-text');
 
         if (momentum.trend === 'increasing_home') {
             trendIcon.textContent = '↗';
             trendText.textContent = 'Home building';
-            trendIcon.style.color = '#1a73e8';
+            trendIcon.style.color = this.colors.home;
         } else if (momentum.trend === 'increasing_away') {
             trendIcon.textContent = '↘';
             trendText.textContent = 'Away building';
-            trendIcon.style.color = '#ea4335';
+            trendIcon.style.color = this.colors.away;
         } else {
             trendIcon.textContent = '→';
             trendText.textContent = 'Stable';
-            trendIcon.style.color = '#9aa0a6';
+            trendIcon.style.color = this.colors.gray400;
         }
     }
 
