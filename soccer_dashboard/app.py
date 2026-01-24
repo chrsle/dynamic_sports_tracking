@@ -627,7 +627,7 @@ def create_possession_figure():
         name='Home',
         text=f"{game_state.possession['home']:.0f}%",
         textposition='inside',
-        textfont=dict(color='white', size=11, family='Inter, sans-serif')
+        textfont=dict(color='white', size=11, family='Raleway, sans-serif')
     ))
 
     fig.add_trace(go.Bar(
@@ -638,7 +638,7 @@ def create_possession_figure():
         name='Away',
         text=f"{game_state.possession['away']:.0f}%",
         textposition='inside',
-        textfont=dict(color='white', size=11, family='Inter, sans-serif')
+        textfont=dict(color='white', size=11, family='Raleway, sans-serif')
     ))
 
     fig.update_layout(
@@ -750,7 +750,7 @@ def create_goalie_figure(team='home'):
 
     fig.add_annotation(
         x=50, y=55, text=f"Quality: {goalie['positioning']*100:.0f}%",
-        showarrow=False, font=dict(color=quality_color, size=11, family='Inter, sans-serif')
+        showarrow=False, font=dict(color=quality_color, size=11, family='Raleway, sans-serif')
     )
 
     fig.update_layout(
