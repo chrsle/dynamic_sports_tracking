@@ -1,0 +1,57 @@
+Subject: Give Your Team the Analytics Edge That's Already Winning in Other Sports
+
+Hi [Team Name] Hockey Operations,
+
+Every NHL front office asks the same question: "How do we find value others miss?"
+
+Soccer clubs have spent a decade answering it with Expected Threat models, action valuation frameworks, and AI-driven player tracking. Basketball teams use spatial dominance analytics to optimize every possession. Baseball's Moneyball revolution changed the game forever.
+
+Hockey is next. And we built the platform to make it happen.
+
+---
+
+WHAT WE OFFER
+
+Dynamic Sports Tracking is a real-time hockey analytics platform that translates 53+ proven research methodologies from soccer, basketball, and baseball directly to the ice.
+
+Key capabilities your coaching staff and front office will use immediately:
+
+- Expected Goals (xG) & Expected Threat (xT): Value every shot, pass, and zone entry with the same frameworks European soccer clubs pay millions for
+
+- Moneyball Analytics Engine: Identify undervalued players, line combinations outperforming their salary, and contract inefficiencies before free agency
+
+- Real-Time Video Analysis: Computer vision tracks every skater, the puck, and goalie positioning frame-by-frame during live games
+
+- Line Chemistry Analysis: Graph neural networks measure passing networks and line effectiveness beyond traditional +/-
+
+- Injury Prediction: Workload monitoring and position-specific models help keep your roster healthy through 82 games
+
+- Tactical Detection: Automatically classify forechecking systems, power play formations, and opponent tendencies
+
+---
+
+WHY NOW
+
+The teams that adopted analytics early in other sports didn't just improve - they dominated. The Astros. Liverpool. The Warriors.
+
+NHL tracking data is getting richer every season. The gap between teams using it effectively and those who aren't will only grow.
+
+We're offering early partnership opportunities with a select number of NHL organizations who want to be ahead of this curve, not catching up to it.
+
+---
+
+NEXT STEP
+
+I'd welcome 20 minutes to show you the platform in action with your own game footage.
+
+No commitment. Just a chance to see what's possible when hockey catches up to the analytics revolution.
+
+Available this week or next at your convenience.
+
+Best regards,
+[Your Name]
+[Your Title]
+[Email]
+[Phone]
+
+P.S. We also offer a real-time dashboard with betting signal analysis, momentum tracking, and live shot maps - useful for broadcast partnerships and fan engagement initiatives if that's of interest.
